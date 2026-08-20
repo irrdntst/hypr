@@ -1,128 +1,158 @@
-# hypr
+<h1 align="center">hypr</h1>
 
-Конфиг Hyprland для Arch/CachyOS с NVIDIA. Минималистичный: без блюра, теней,
-скруглений и анимаций — всё ради отзывчивости.
+<p align="center">
+  A lean Hyprland setup for Arch — no blur, no shadows, no animations.<br>
+  Just a compositor that gets out of the way.
+</p>
 
-Стек: **hyprland + waybar + wofi + kitty + mako**.
+<p align="center">
+  <code>hyprland</code> · <code>waybar</code> · <code>wofi</code> · <code>kitty</code> · <code>mako</code>
+</p>
 
-> Конфиг написан на **Lua**. С Hyprland 0.55 hyprlang объявлен устаревшим,
-> и основной файл теперь `~/.config/hypr/hyprland.lua`.
-> Документация: <https://wiki.hypr.land/Configuring/Start/>
+---
 
-## Установка
+Every effect that costs a frame is off by default. Borders are one pixel, gaps
+are four, windows appear the instant you ask for them. If you later decide you
+want motion back, a fast animation preset is sitting commented out at the
+bottom of `conf/look.lua` — one uncomment away.
+
+Written in **Lua**, not hyprlang: since Hyprland 0.55 hyprlang is deprecated and
+the entry point is `~/.config/hypr/hyprland.lua`.
+See the [configuration docs](https://wiki.hypr.land/Configuring/Start/).
+
+## Quick start
 
 ```bash
-git clone <этот-репозиторий> ~/dotfiles
+git clone -b claude/hyprland-config-dotfiles-uefx51 https://github.com/irrdntst/hypr ~/dotfiles
 cd ~/dotfiles
-
-./install.sh --dry-run              # посмотреть, что будет сделано
-./install.sh --packages --nvidia    # поставить пакеты и разложить конфиги
+./install.sh --packages --nvidia
 ```
 
-`install.sh` создаёт симлинки из `config/*` в `~/.config/`. Всё, что там уже
-лежало, переносится в `<имя>.bak.<дата>` — ничего не удаляется молча.
-Повторный запуск безопасен: существующие правильные симлинки не трогаются.
+Reboot, then from a tty:
 
-Флаги: `--dry-run` (`-n`), `--packages`, `--nvidia`, `--help`.
-
-### После установки
-
-1. Перезагрузиться и убедиться, что DRM modesetting включён:
-   ```bash
-   cat /sys/module/nvidia_drm/parameters/modeset   # должно вывести Y
-   ```
-2. Запустить сессию из tty: `start-hyprland`
-3. Прописать свои мониторы в `config/hypr/conf/monitors.lua`
-   (`hyprctl monitors all` покажет имена выходов и режимы).
-
-Конфиг перечитывается в момент сохранения файла. Вручную — `hyprctl reload`,
-список претензий Hyprland — `hyprctl configerrors`.
-
-Если конфиг сломан, Hyprland оставляет аварийные биндов:
-`SUPER+Q` — терминал, `SUPER+R` — запуск, `SUPER+M` — выход.
-
-## Структура
-
-```
-config/hypr/hyprland.lua      точка входа, только require()
-config/hypr/conf/
-    env.lua                   переменные окружения, блок NVIDIA
-    monitors.lua              мониторы
-    look.lua                  внешний вид, палитра, анимации
-    input.lua                 клавиатура (us,ru), мышь, тачпад
-    rules.lua                 правила окон и слоёв
-    keybinds.lua              все биндов
-    autostart.lua             что запускается со стартом сессии
-config/{waybar,wofi,kitty,mako}/
-install.sh                    симлинки + пакеты
-packages/                     списки пакетов для pacman
-tests/check.lua               офлайн-проверка конфига
+```bash
+start-hyprland
 ```
 
-Каждый `require()` — отдельная Lua-область видимости: ошибка в одном файле
-не мешает загрузиться остальным.
+That's it. `SUPER+Return` opens a terminal, `SUPER+R` the launcher,
+`SUPER+M` exits.
 
-Локальные правки под конкретную машину можно положить в
-`~/.config/hypr/local.lua` — он подключается последним и не отслеживается git.
+<details>
+<summary><b>What the installer actually does</b></summary>
 
-## Клавиши
+<br>
 
-`SUPER` — основной модификатор.
+`install.sh` symlinks `config/*` into `~/.config/`. Anything already sitting
+there is moved to `<name>.bak.<timestamp>` — nothing is ever deleted silently.
+Re-running it is safe: links that already point here are left alone.
 
-| Клавиши | Действие |
+| Flag | Effect |
 | --- | --- |
-| `SUPER + Return` | терминал (kitty) |
-| `SUPER + R` | лаунчер (wofi) |
-| `SUPER + Q` / `SUPER + SHIFT + Q` | закрыть окно / убить процесс |
-| `SUPER + M` | выйти из Hyprland |
-| `SUPER + V` | плавающий режим |
-| `SUPER + F` / `SUPER + SHIFT + F` | фуллскрин / максимизация |
-| `SUPER + C` | центрировать окно |
-| `SUPER + J` | сменить направление сплита |
-| `SUPER + h/j/k/l`, стрелки | фокус |
-| `SUPER + SHIFT + h/j/k/l` | переместить окно |
-| `SUPER + Tab` | предыдущее окно |
-| `SUPER + 1..0` | рабочий стол |
-| `SUPER + SHIFT + 1..0` | перенести окно на рабочий стол |
-| `SUPER + колесо` | листать рабочие столы |
-| `SUPER + S` / `SUPER + SHIFT + S` | скретчпад |
-| `SUPER + ЛКМ` / `SUPER + ПКМ` | двигать / растягивать мышью |
-| `SUPER + ALT + R` | режим ресайза (выход — `Esc`) |
-| мультимедиа-клавиши | громкость, микрофон, яркость, плеер |
+| `--dry-run`, `-n` | print every action, change nothing |
+| `--packages` | install the core packages with pacman |
+| `--nvidia` | install the NVIDIA packages |
+| `--help`, `-h` | usage |
 
-Раскладка переключается `Alt + Shift` (`us` ⇄ `ru`).
+It honours `XDG_CONFIG_HOME`, so you can rehearse the whole thing in a
+throwaway directory before touching your real config:
 
-## Проверка конфига без Hyprland
+```bash
+XDG_CONFIG_HOME=/tmp/hyprtest ./install.sh
+```
+
+</details>
+
+## Keybinds
+
+`SUPER` is the modifier throughout.
+
+| Keys | Action |
+| --- | --- |
+| `SUPER + Return` | terminal (kitty) |
+| `SUPER + R` | launcher (wofi) |
+| `SUPER + Q` / `SUPER + SHIFT + Q` | close window / kill the process |
+| `SUPER + M` | exit Hyprland |
+| `SUPER + V` | toggle floating |
+| `SUPER + F` / `SUPER + SHIFT + F` | fullscreen / maximize |
+| `SUPER + C` | center window |
+| `SUPER + J` | flip the split direction |
+| `SUPER + h/j/k/l`, arrows | move focus |
+| `SUPER + SHIFT + h/j/k/l` | move the window |
+| `SUPER + Tab` | last window |
+| `SUPER + 1..0` | switch workspace |
+| `SUPER + SHIFT + 1..0` | send window to workspace |
+| `SUPER + scroll` | cycle workspaces |
+| `SUPER + S` / `SUPER + SHIFT + S` | scratchpad |
+| `SUPER + LMB` / `SUPER + RMB` | drag / resize with the mouse |
+| `SUPER + ALT + R` | resize mode (`Esc` to leave) |
+| media keys | volume, mic, brightness, playback |
+
+Keyboard layout toggles with `Alt + Shift` (`us` ⇄ `ru`).
+
+## Layout
+
+```
+config/hypr/hyprland.lua      entry point — nothing but require()
+config/hypr/conf/
+    env.lua                   environment variables, NVIDIA block
+    monitors.lua              displays
+    look.lua                  palette, decorations, animations
+    input.lua                 keyboard, mouse, touchpad
+    rules.lua                 window and layer rules
+    keybinds.lua              every bind
+    autostart.lua             what starts with the session
+config/{waybar,wofi,kitty,mako}/
+install.sh                    symlinks and packages
+packages/                     pacman package lists
+tests/check.lua               offline config check
+```
+
+Each `require()` gets its own Lua scope, so a mistake in one file doesn't take
+the rest of the config down with it. Machine-specific tweaks go in
+`~/.config/hypr/local.lua`, which is loaded last and stays out of git.
+
+## Checking the config without Hyprland
 
 ```bash
 lua tests/check.lua
 ```
 
-Скрипт подменяет глобальный `hl` заглушкой, повторяющей документированный API,
-и исполняет конфиг. Ловит синтаксические ошибки, несуществующие функции
-`hl.*`, неизвестные диспатчеры и неизвестные секции конфига. Значения
-отдельных опций он не проверяет — это умеет только сам Hyprland.
+This builds a stub `hl` global mirroring the documented API, then executes the
+config against it. Syntax errors, misspelled `hl.*` functions, unknown
+dispatchers and unknown config sections all fail the run — no compositor
+required. It can't validate individual option *values*; only Hyprland can.
+
+Configs reload the moment you save them. To reload by hand: `hyprctl reload`.
+To see what Hyprland objected to: `hyprctl configerrors`. And if you break the
+config badly, Hyprland still hands you emergency binds — `SUPER+Q` for a
+terminal, `SUPER+R` to run something, `SUPER+M` to get out.
 
 ## NVIDIA
 
-Нужны только две переменные окружения (`conf/env.lua`):
-`LIBVA_DRIVER_NAME=nvidia` и `__GLX_VENDOR_LIBRARY_NAME=nvidia`.
-Плюс `ELECTRON_OZONE_PLATFORM_HINT=auto` — от мерцания Electron-приложений.
+Two environment variables carry the whole thing (`conf/env.lua`):
+`LIBVA_DRIVER_NAME=nvidia` and `__GLX_VENDOR_LIBRARY_NAME=nvidia`, plus
+`ELECTRON_OZONE_PLATFORM_HINT=auto` to stop Electron apps from flickering.
 
-Старые гайды советуют `GBM_BACKEND`, `WLR_NO_HARDWARE_CURSORS` и
-`XDG_SESSION_TYPE` — сейчас это устарело, добавлять их обратно не нужно.
+Older guides also recommend `GBM_BACKEND`, `WLR_NO_HARDWARE_CURSORS` and
+`XDG_SESSION_TYPE`. Those are obsolete — don't add them back.
 
-`nvidia_drm modeset=1` на Arch включён из коробки. Если курсор мигает или
-пропадает — раскомментировать `no_hardware_cursors` в `conf/look.lua`.
+`nvidia_drm modeset=1` is already enabled on Arch. Verify with:
 
-Подробности: <https://wiki.hypr.land/Nvidia/>
+```bash
+cat /sys/module/nvidia_drm/parameters/modeset   # prints Y
+```
 
-## Что дальше
+If the cursor flickers or vanishes, uncomment `no_hardware_cursors` in
+`conf/look.lua`. Full details on the [Hyprland NVIDIA page](https://wiki.hypr.land/Nvidia/).
 
-Заготовки уже лежат закомментированными в конфигах:
+## Roadmap
 
-- `hyprlock` + `hypridle` — блокировка экрана и автоблокировка
-- `hyprpaper` — обои
-- `grim` + `slurp` — скриншоты (биндов на `Print` в `keybinds.lua`)
-- `cliphist` — история буфера обмена
-- быстрый пресет анимаций — в конце `conf/look.lua`
+The skeleton is deliberately bare. Placeholders are already commented in place
+for the next layer:
+
+- [ ] `hyprlock` + `hypridle` — screen lock and idle handling
+- [ ] `hyprpaper` — wallpapers
+- [ ] `grim` + `slurp` — screenshots (binds waiting in `keybinds.lua`)
+- [ ] `cliphist` — clipboard history
+- [ ] one shared palette file instead of four hand-synced copies
+- [ ] Nerd Font icons in waybar instead of text labels
