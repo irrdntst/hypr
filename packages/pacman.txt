@@ -1,37 +1,34 @@
-# Core packages. Install with: ./install.sh --packages
+# Core packages — the hard dependencies of this config.
+# Nothing here is optional: remove any of it and something in the config stops
+# working. Extras live in pacman-optional.txt.
+#
+#   ./install.sh --packages
+#
 # Lines starting with # and blank lines are ignored.
 
-# Compositor and session plumbing
+# Compositor
 hyprland
-xorg-xwayland
+xorg-xwayland                 # X11 apps; without it they simply don't start
+
+# Session plumbing
 xdg-desktop-portal-hyprland   # screen sharing, native file pickers
 xdg-desktop-portal-gtk        # GTK portal backend (file dialogs)
 polkit
-hyprpolkitagent               # lets GUI apps ask for a password
+hyprpolkitagent               # started from conf/autostart.lua
 
-# The base stack
+# The stack itself — every one of these is referenced by the config
 waybar
 wofi
 kitty
 mako
 
-# Audio
+# Audio. wpctl comes from wireplumber and drives the volume keybinds.
 pipewire
 pipewire-pulse
-pipewire-alsa
 wireplumber
-pavucontrol
-playerctl
 
-# Utilities used by keybinds
-brightnessctl
-wl-clipboard
-
-# Wayland support for Qt apps
-qt5-wayland
+# Wayland support for Qt6 apps
 qt6-wayland
 
-# Fonts
+# Referenced by name in waybar, kitty, wofi and mako configs
 ttf-jetbrains-mono-nerd
-noto-fonts
-noto-fonts-emoji

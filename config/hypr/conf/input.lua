@@ -6,9 +6,9 @@ hl.config({
         kb_layout  = "us,ru",
         kb_options = "grp:alt_shift_toggle",
 
-        -- Keybinds keep working on the Cyrillic layout: they are resolved
-        -- against the first layout instead of the current symbol.
-        resolve_binds_by_sym = false,
+        -- Binds resolve against the first layout by default, so they keep
+        -- working while typing Cyrillic. Set resolve_binds_by_sym = true if
+        -- you'd rather they follow the active layout.
 
         follow_mouse = 1,
         sensitivity  = 0,   -- -1.0 .. 1.0, 0 = raw libinput default
@@ -19,11 +19,9 @@ hl.config({
         numlock_by_default = true,
 
         touchpad = {
-            natural_scroll      = false,
-            disable_while_typing = true,
-            tap_button_map      = "lrm",
+            tap_button_map       = "lrm",
             clickfinger_behavior = true,
-            scroll_factor       = 0.8,
+            scroll_factor        = 0.8,
         },
     },
 })

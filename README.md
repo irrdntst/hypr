@@ -50,6 +50,7 @@ Re-running it is safe: links that already point here are left alone.
 | --- | --- |
 | `--dry-run`, `-n` | print every action, change nothing |
 | `--packages` | install the core packages with pacman |
+| `--optional` | install the optional extras |
 | `--nvidia` | install the NVIDIA packages |
 | `--help`, `-h` | usage |
 
@@ -103,7 +104,9 @@ config/hypr/conf/
     autostart.lua             what starts with the session
 config/{waybar,wofi,kitty,mako}/
 install.sh                    symlinks and packages
-packages/                     pacman package lists
+packages/pacman.txt           hard dependencies — the config breaks without them
+packages/pacman-optional.txt  extras, each tied to a commented-out feature
+packages/pacman-nvidia.txt    driver and video acceleration
 tests/check.lua               offline config check
 ```
 
@@ -126,6 +129,36 @@ Configs reload the moment you save them. To reload by hand: `hyprctl reload`.
 To see what Hyprland objected to: `hyprctl configerrors`. And if you break the
 config badly, Hyprland still hands you emergency binds — `SUPER+Q` for a
 terminal, `SUPER+R` to run something, `SUPER+M` to get out.
+
+## Keeping the app list clean
+
+`packages/pacman.txt` holds only what the config actually calls. Everything
+else — media keys, a GUI mixer, screenshot tools — lives in
+`pacman-optional.txt`, with the matching keybinds commented out until you
+install the package.
+
+The reason is the launcher. Every GUI package drops a `.desktop` file into
+`/usr/share/applications`, and wofi lists all of them whether or not they are
+useful — including entries pulled in as dependencies of something else. To see
+what is actually there:
+
+```bash
+ls /usr/share/applications
+```
+
+To hide an entry without uninstalling anything, shadow it with a local
+override:
+
+```bash
+mkdir -p ~/.local/share/applications
+printf '[Desktop Entry]\nType=Application\nName=whatever\nExec=/bin/true\nNoDisplay=true\n' \
+  > ~/.local/share/applications/whatever.desktop
+```
+
+Files in `~/.local/share/applications` take precedence over the system ones, so
+`NoDisplay=true` removes the entry from every launcher while leaving the
+package installed. If an entry *does* something odd instead of hiding, run its
+`Exec=` line by hand in a terminal — that is where the real error message is.
 
 ## NVIDIA
 

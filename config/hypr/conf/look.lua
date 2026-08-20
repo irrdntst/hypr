@@ -27,9 +27,6 @@ hl.config({
     decoration = {
         rounding = 0,
 
-        active_opacity   = 1.0,
-        inactive_opacity = 1.0,
-
         -- The two most expensive effects in Hyprland. Both off.
         blur   = { enabled = false },
         shadow = { enabled = false },
@@ -48,10 +45,6 @@ hl.config({
         disable_hyprland_logo   = true,
         disable_splash_rendering = true,
         background_color        = 0x16181d,
-
-        -- Don't animate what the mouse is already dragging.
-        animate_manual_resizes       = false,
-        animate_mouse_windowdragging = false,
     },
 
     -- Uncomment ONLY if the cursor flickers or disappears on NVIDIA.

@@ -4,6 +4,7 @@
 #   ./install.sh --dry-run     show what would happen, change nothing
 #   ./install.sh               link the configs
 #   ./install.sh --packages    also install the core packages with pacman
+#   ./install.sh --optional    also install the optional extras
 #   ./install.sh --nvidia      also install the NVIDIA packages
 #
 # Safe to re-run: links that already point here are left alone.
@@ -16,10 +17,11 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 
 DRY_RUN=0
 WITH_PACKAGES=0
+WITH_OPTIONAL=0
 WITH_NVIDIA=0
 
 usage() {
-    sed -n '2,10p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,11p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
     exit "${1:-0}"
 }
 
@@ -38,6 +40,7 @@ while (( $# )); do
     case "$1" in
         -n|--dry-run) DRY_RUN=1 ;;
         --packages)   WITH_PACKAGES=1 ;;
+        --optional)   WITH_OPTIONAL=1 ;;
         --nvidia)     WITH_NVIDIA=1 ;;
         -h|--help)    usage 0 ;;
         *) printf 'unknown option: %s\n\n' "$1" >&2; usage 1 ;;
@@ -117,6 +120,10 @@ fi
 
 if (( WITH_PACKAGES )); then
     install_packages "$DOTFILES/packages/pacman.txt" "core packages"
+fi
+
+if (( WITH_OPTIONAL )); then
+    install_packages "$DOTFILES/packages/pacman-optional.txt" "optional packages"
 fi
 
 if (( WITH_NVIDIA )); then
