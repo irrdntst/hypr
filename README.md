@@ -242,13 +242,28 @@ cat /sys/module/nvidia_drm/parameters/modeset   # prints Y
 If the cursor flickers or vanishes, uncomment `no_hardware_cursors` in
 `conf/look.lua`. Full details on the [Hyprland NVIDIA page](https://wiki.hypr.land/Nvidia/).
 
-## Roadmap
+## Versioning
 
-The skeleton is deliberately bare. Placeholders are already commented in place
-for the next layer:
+Versions are git tags, `v0.1.0` and up, with the reasoning behind each release
+in [CHANGELOG.md](CHANGELOG.md). Semantic versioning, read for a config: major
+means you have to relearn or reinstall something, minor means a new capability,
+patch means a fix you can ignore. Below `1.0` a minor release may still break
+things.
+
+```bash
+git describe --tags        # which version you are on
+git log --oneline v0.1.0.. # what landed since
+```
+
+## Road to 1.0
+
+`1.0` is the point where this stops being a skeleton: a fresh Arch machine
+gets a desktop that needs nothing added by hand.
 
 - [ ] `hyprlock` + `hypridle` — screen lock and idle handling
 - [ ] `grim` + `slurp` — screenshots (binds waiting in `keybinds.lua`)
 - [ ] `cliphist` — clipboard history
+- [ ] dark GTK/Qt theming, so Thunar and friends stop rendering light
 - [ ] one shared palette file instead of four hand-synced copies
 - [ ] Nerd Font icons in waybar instead of text labels
+- [ ] a full install verified end to end on a clean machine

@@ -37,6 +37,10 @@ usage() {
 }
 
 log()  { printf '%s\n' "$*"; }
+
+version() {
+    git -C "$DOTFILES" describe --tags --always --dirty 2>/dev/null || echo "unknown"
+}
 step() { printf '\n== %s\n' "$*"; }
 
 run() {
@@ -185,6 +189,8 @@ post_install_notes() {
   SUPER+Q (terminal), SUPER+R (run) and SUPER+M (exit).
 NOTES
 }
+
+log "hypr $(version)"
 
 if (( DRY_RUN )); then
     log "DRY RUN — nothing will be changed."
