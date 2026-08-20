@@ -35,6 +35,12 @@ end
 
 local function recorder() return function() return {} end end
 
+-- Every shell command the config runs, collected for the package check below.
+local commands = {}
+local function record_cmd(cmd)
+    if type(cmd) == "string" then commands[#commands + 1] = cmd end
+end
+
 local function group(name, names)
     local fields = {}
     for _, n in ipairs(names) do fields[n] = recorder() end
@@ -59,6 +65,8 @@ local dsp_cursor    = { "move_to_corner", "move" }
 
 local dsp_fields = {}
 for _, n in ipairs(dsp_general) do dsp_fields[n] = recorder() end
+dsp_fields.exec_cmd = function(cmd) record_cmd(cmd) return {} end
+dsp_fields.exec_raw = function(cmd) record_cmd(cmd) return {} end
 dsp_fields.window    = group("hl.dsp.window", dsp_window)
 dsp_fields.workspace = group("hl.dsp.workspace", dsp_workspace)
 dsp_fields.group     = group("hl.dsp.group", dsp_group)
@@ -138,8 +146,8 @@ local hl_fields = {
     permission     = recorder(),
     dispatch       = recorder(),
     timer          = recorder(),
-    exec_cmd       = function() calls.autostart = calls.autostart + 1 end,
-    exec_raw       = function() calls.autostart = calls.autostart + 1 end,
+    exec_cmd       = function(cmd) calls.autostart = calls.autostart + 1 record_cmd(cmd) end,
+    exec_raw       = function(cmd) calls.autostart = calls.autostart + 1 record_cmd(cmd) end,
     notify         = recorder(),
 }
 
@@ -159,6 +167,97 @@ for _, fn in ipairs(start_handlers) do
     if not ok2 then fail("hyprland.start handler failed: " .. tostring(err2)) end
 end
 
+-- ---------------------------------------------------------------------------
+-- Every program the config invokes must be covered by a package list.
+-- This is what catches a keybind calling something nobody installs.
+
+local PACKAGE_OF = {
+    kitty        = "kitty",
+    wofi         = "wofi",
+    waybar       = "waybar",
+    mako         = "mako",
+    makoctl      = "mako",
+    wpctl        = "wireplumber",
+    hyprctl      = "hyprland",
+    hyprshutdown = "hyprland",
+    hyprlauncher = "hyprlauncher",
+    brightnessctl = "brightnessctl",
+    playerctl     = "playerctl",
+    pavucontrol   = "pavucontrol",
+    udiskie       = "udiskie",
+    grim          = "grim",
+    slurp         = "slurp",
+    cliphist      = "cliphist",
+    ["wl-copy"]              = "wl-clipboard",
+    ["blueman-applet"]       = "blueman",
+    ["blueman-manager"]      = "blueman",
+    ["nm-applet"]            = "network-manager-applet",
+    ["nm-connection-editor"] = "network-manager-applet",
+}
+
+-- Shell builtins and things the base system always provides.
+local ALWAYS_PRESENT = {
+    ["command"] = true, ["sh"] = true, ["systemctl"] = true, ["pkill"] = true,
+    ["echo"] = true, ["true"] = true, ["false"] = true, ["test"] = true,
+}
+
+-- Waybar runs commands too, and they live in JSON rather than Lua. Some
+-- modules take an action name there instead of a program; those are not
+-- commands and must not be looked up as packages.
+local WAYBAR_ACTIONS = { activate = true, toggle = true, close = true }
+
+do
+    local f = io.open(ROOT .. "/config/waybar/config.jsonc", "r")
+    if f then
+        for cmd in f:read("a"):gmatch('"on%-click[%w%-]*"%s*:%s*"([^"]+)"') do
+            if not WAYBAR_ACTIONS[cmd] then record_cmd(cmd) end
+        end
+        f:close()
+    end
+end
+
+-- Union of every packages/*.txt, with comments stripped.
+local listed = {}
+local have_lists = false
+local ls = io.popen('ls "' .. ROOT .. '/packages" 2>/dev/null')
+if ls then
+    for name in ls:lines() do
+        local f = io.open(ROOT .. "/packages/" .. name, "r")
+        if f then
+            have_lists = true
+            for line in f:lines() do
+                local pkg = line:gsub("#.*", ""):gsub("%s", "")
+                if pkg ~= "" then listed[pkg] = true end
+            end
+            f:close()
+        end
+    end
+    ls:close()
+end
+
+if have_lists then
+    local seen = {}
+    for _, cmd in ipairs(commands) do
+        -- Drop redirections, then treat |, & and ; as command boundaries.
+        local stripped = cmd:gsub("%d*[<>]+%s*%S+", " ")
+        for segment in stripped:gsub("[|&;]+", "\n"):gmatch("[^\n]+") do
+            local binary = segment:match("^%s*([%w%._%-/]+)")
+            if binary then binary = binary:match("([^/]+)$") end
+            if binary and not ALWAYS_PRESENT[binary] and not seen[binary] then
+                seen[binary] = true
+                local pkg = PACKAGE_OF[binary]
+                if not pkg then
+                    fail(("config runs '%s', which the package map in this test does not know")
+                        :format(binary))
+                elseif not listed[pkg] then
+                    fail(("config runs '%s', but package '%s' is in no packages/*.txt")
+                        :format(binary, pkg))
+                end
+            end
+        end
+    end
+end
+
 if #errors > 0 then
     io.stderr:write("FAIL: " .. #errors .. " problem(s)\n")
     for _, e in ipairs(errors) do io.stderr:write("  - " .. e .. "\n") end
@@ -167,3 +266,4 @@ end
 
 print(("OK: %d binds, %d rules, %d env vars, %d monitor rules, %d submaps, %d autostart commands")
     :format(calls.binds, calls.rules, calls.env, calls.monitors, calls.submaps, calls.autostart))
+print(("OK: %d shell commands, every program covered by a package list"):format(#commands))

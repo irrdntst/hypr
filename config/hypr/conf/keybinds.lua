@@ -6,6 +6,10 @@
 -- or clipboard tools in a Lua function here — use hl.dsp.exec_cmd() so the
 -- command runs outside the callback.
 
+-- Pressing the number of the workspace you are already on returns you to the
+-- previous one, i3-style.
+hl.config({ binds = { workspace_back_and_forth = true } })
+
 local mod = "SUPER"
 
 local terminal = "kitty"
@@ -14,9 +18,8 @@ local menu     = "wofi --show drun"
 ---- Apps ----
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mod .. " + R",      hl.dsp.exec_cmd(menu))
--- hyprlauncher is hyprwm's own launcher (package: hyprlauncher). Try it and
--- keep whichever you like better.
--- hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprlauncher"))
+-- hyprlauncher is hyprwm's own launcher (package: hyprlauncher). To try it,
+-- swap it into the bind above and keep whichever you prefer.
 
 ---- Session ----
 hl.bind(mod .. " + Q",         hl.dsp.window.close())
@@ -25,12 +28,16 @@ hl.bind(mod .. " + SHIFT + Q", hl.dsp.window.kill())
 hl.bind(mod .. " + M", hl.dsp.exec_cmd(
     "command -v hyprshutdown >/dev/null 2>&1 && hyprshutdown || hyprctl dispatch 'hl.dsp.exit()'"))
 
+-- The config reloads on save anyway; this is for when you edit it elsewhere.
+hl.bind(mod .. " + SHIFT + R", hl.dsp.exec_cmd("hyprctl reload"))
+
 ---- Window state ----
 hl.bind(mod .. " + V",         hl.dsp.window.float({ action = "toggle" }))
 hl.bind(mod .. " + F",         hl.dsp.window.fullscreen({ mode = "fullscreen", action = "toggle" }))
 hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "maximized",  action = "toggle" }))
 hl.bind(mod .. " + P",         hl.dsp.window.pseudo({ action = "toggle" }))
 hl.bind(mod .. " + C",         hl.dsp.window.center())
+hl.bind(mod .. " + SHIFT + P", hl.dsp.window.pin())   -- floating only: show on every workspace
 hl.bind(mod .. " + J",         hl.dsp.layout("togglesplit"))  -- dwindle only
 
 ---- Focus ----
@@ -46,6 +53,12 @@ hl.bind(mod .. " + up",    hl.dsp.focus({ direction = "u" }))
 hl.bind(mod .. " + right", hl.dsp.focus({ direction = "r" }))
 
 hl.bind(mod .. " + Tab", hl.dsp.focus({ last = true }))
+
+---- Groups (tabbed windows) ----
+-- A group stacks windows in the space of one, like i3's tabbed container.
+hl.bind(mod .. " + G",       hl.dsp.group.toggle())
+hl.bind(mod .. " + ALT + h", hl.dsp.group.prev())
+hl.bind(mod .. " + ALT + l", hl.dsp.group.next())
 
 ---- Workspaces ----
 for i = 1, 10 do
@@ -108,6 +121,11 @@ hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURC
 -- hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
 -- hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"),       { locked = true })
 -- hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
+
+---- Notifications ----
+-- makoctl ships with mako, so these need nothing extra.
+hl.bind(mod .. " + N",         hl.dsp.exec_cmd("makoctl dismiss -a"))
+hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("makoctl mode -t do-not-disturb"))
 
 ---- Screenshots ----
 -- Needs grim + slurp + wl-clipboard. Uncomment once they're installed.

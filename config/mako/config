@@ -16,6 +16,10 @@ default-timeout=6000
 max-visible=5
 icons=1
 
+# Toggled with SUPER+SHIFT+N (makoctl mode -t do-not-disturb).
+[mode=do-not-disturb]
+invisible=1
+
 [urgency=low]
 text-color=#7a8091
 

@@ -53,6 +53,7 @@ Re-running it is safe: links that already point here are left alone.
 | `--optional` | install the optional extras |
 | `--system` | install bluetooth, network and tray tools |
 | `--nvidia` | install the NVIDIA packages |
+| `--restore` | remove our links and put the backed-up configs back |
 | `--help`, `-h` | usage |
 
 It honours `XDG_CONFIG_HOME`, so you can rehearse the whole thing in a
@@ -77,17 +78,25 @@ XDG_CONFIG_HOME=/tmp/hyprtest ./install.sh
 | `SUPER + V` | toggle floating |
 | `SUPER + F` / `SUPER + SHIFT + F` | fullscreen / maximize |
 | `SUPER + C` | center window |
+| `SUPER + SHIFT + P` | pin a floating window to every workspace |
 | `SUPER + J` | flip the split direction |
 | `SUPER + h/j/k/l`, arrows | move focus |
 | `SUPER + SHIFT + h/j/k/l` | move the window |
 | `SUPER + Tab` | last window |
-| `SUPER + 1..0` | switch workspace |
+| `SUPER + G` | group windows into tabs |
+| `SUPER + ALT + h/l` | previous / next tab in the group |
+| `SUPER + 1..0` | switch workspace (again returns to the previous one) |
 | `SUPER + SHIFT + 1..0` | send window to workspace |
 | `SUPER + scroll` | cycle workspaces |
 | `SUPER + S` / `SUPER + SHIFT + S` | scratchpad |
 | `SUPER + LMB` / `SUPER + RMB` | drag / resize with the mouse |
 | `SUPER + ALT + R` | resize mode (`Esc` to leave) |
-| media keys | volume, mic, brightness, playback |
+| `SUPER + N` / `SUPER + SHIFT + N` | dismiss notifications / do-not-disturb |
+| `SUPER + SHIFT + R` | reload the config |
+| volume keys | volume and mic |
+
+Media and brightness keys are bound but commented out — they need `playerctl`
+and `brightnessctl` from `packages/pacman-optional.txt`.
 
 Keyboard layout toggles with `Alt + Shift` (`us` ⇄ `ru`).
 
@@ -125,7 +134,14 @@ lua tests/check.lua
 This builds a stub `hl` global mirroring the documented API, then executes the
 config against it. Syntax errors, misspelled `hl.*` functions, unknown
 dispatchers and unknown config sections all fail the run — no compositor
-required. It can't validate individual option *values*; only Hyprland can.
+required.
+
+It also collects every shell command the config runs, keybinds and waybar
+click actions alike, and checks that each program is covered by one of the
+`packages/*.txt` lists. That is what stops a keybind from quietly calling
+something nobody installs.
+
+What it can't do is validate individual option *values* — only Hyprland can.
 
 Configs reload the moment you save them. To reload by hand: `hyprctl reload`.
 To see what Hyprland objected to: `hyprctl configerrors`. And if you break the

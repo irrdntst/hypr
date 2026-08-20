@@ -25,6 +25,15 @@ hl.window_rule({
     no_focus = true,
 })
 
+-- Modal dialogs ("are you sure?", print, preferences) belong on top of their
+-- parent, not tiled into the layout.
+hl.window_rule({
+    name  = "float-modals",
+    match = { modal = true },
+    float  = true,
+    center = true,
+})
+
 -- System dialogs are more useful floating and centered than tiled.
 hl.window_rule({
     name  = "float-system-dialogs",

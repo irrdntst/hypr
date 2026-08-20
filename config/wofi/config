@@ -3,6 +3,7 @@ mode=drun
 allow_images=false
 allow_markup=true
 insensitive=true
+matching=multi-contains   # "web fire" finds "Firefox Web Browser"
 prompt=run
 width=520
 height=380

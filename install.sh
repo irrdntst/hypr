@@ -7,6 +7,7 @@
 #   ./install.sh --optional    also install the optional extras
 #   ./install.sh --system      also install bluetooth, network and tray tools
 #   ./install.sh --nvidia      also install the NVIDIA packages
+#   ./install.sh --restore     undo: drop our links, put the backups back
 #
 # Safe to re-run: links that already point here are left alone.
 
@@ -20,10 +21,11 @@ DRY_RUN=0
 WITH_PACKAGES=0
 WITH_OPTIONAL=0
 WITH_SYSTEM=0
+RESTORE=0
 WITH_NVIDIA=0
 
 usage() {
-    sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,13p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
     exit "${1:-0}"
 }
 
@@ -45,6 +47,7 @@ while (( $# )); do
         --optional)   WITH_OPTIONAL=1 ;;
         --system)     WITH_SYSTEM=1 ;;
         --nvidia)     WITH_NVIDIA=1 ;;
+        --restore)    RESTORE=1 ;;
         -h|--help)    usage 0 ;;
         *) printf 'unknown option: %s\n\n' "$1" >&2; usage 1 ;;
     esac
@@ -100,6 +103,40 @@ link_configs() {
     done
 }
 
+restore_configs() {
+    step "Restoring $CONFIG_HOME from backups"
+
+    local source target name backups newest
+    for source in "$DOTFILES"/config/*/; do
+        source="${source%/}"
+        name="$(basename "$source")"
+        target="$CONFIG_HOME/$name"
+
+        if [[ -L "$target" && "$(readlink -f "$target")" == "$source" ]]; then
+            log "  $name -> removing our link"
+            run rm "$target"
+        elif [[ -e "$target" ]]; then
+            log "  $name -> not ours, leaving it alone"
+            continue
+        fi
+
+        # Timestamped names sort chronologically, so the last glob match is the
+        # most recent backup.
+        backups=("$target".bak.*)
+        if [[ -e "${backups[0]}" ]]; then
+            newest="${backups[-1]}"
+            log "  $name -> restoring $(basename "$newest")"
+            run mv "$newest" "$target"
+        else
+            log "  $name -> no backup to restore"
+        fi
+    done
+
+    log ""
+    log "Older backups, if any, are left in place. Remove them with:"
+    log "  rm -rf $CONFIG_HOME/*.bak.*"
+}
+
 post_install_notes() {
     step "Next steps"
     cat <<'NOTES'
@@ -137,6 +174,11 @@ fi
 
 if (( WITH_NVIDIA )); then
     install_packages "$DOTFILES/packages/pacman-nvidia.txt" "NVIDIA packages"
+fi
+
+if (( RESTORE )); then
+    restore_configs
+    exit 0
 fi
 
 link_configs
