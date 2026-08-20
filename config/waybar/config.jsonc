@@ -11,6 +11,7 @@
   "modules-center": ["hyprland/window"],
   "modules-right": [
     "hyprland/language",
+    "bluetooth",
     "pulseaudio",
     "network",
     "cpu",
@@ -43,6 +44,18 @@
     "tooltip": false
   },
 
+  // Hides itself when the machine has no bluetooth controller.
+  "bluetooth": {
+    "format": "bt {status}",
+    "format-disabled": "",
+    "format-no-controller": "",
+    "format-connected": "bt {num_connections}",
+    "tooltip-format": "{controller_alias}",
+    "tooltip-format-connected": "{controller_alias}\n\n{device_enumerate}",
+    "tooltip-format-enumerate-connected": "{device_alias}",
+    "on-click": "blueman-manager"
+  },
+
   "pulseaudio": {
     "format": "vol {volume}%",
     "format-muted": "vol --",
@@ -57,6 +70,7 @@
     "format-ethernet": "eth",
     "format-disconnected": "offline",
     "tooltip-format": "{ifname} {ipaddr}",
+    "on-click": "nm-connection-editor",
     "interval": 10
   },
 

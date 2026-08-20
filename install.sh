@@ -5,6 +5,7 @@
 #   ./install.sh               link the configs
 #   ./install.sh --packages    also install the core packages with pacman
 #   ./install.sh --optional    also install the optional extras
+#   ./install.sh --system      also install bluetooth, network and tray tools
 #   ./install.sh --nvidia      also install the NVIDIA packages
 #
 # Safe to re-run: links that already point here are left alone.
@@ -18,10 +19,11 @@ STAMP="$(date +%Y%m%d-%H%M%S)"
 DRY_RUN=0
 WITH_PACKAGES=0
 WITH_OPTIONAL=0
+WITH_SYSTEM=0
 WITH_NVIDIA=0
 
 usage() {
-    sed -n '2,11p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
     exit "${1:-0}"
 }
 
@@ -41,6 +43,7 @@ while (( $# )); do
         -n|--dry-run) DRY_RUN=1 ;;
         --packages)   WITH_PACKAGES=1 ;;
         --optional)   WITH_OPTIONAL=1 ;;
+        --system)     WITH_SYSTEM=1 ;;
         --nvidia)     WITH_NVIDIA=1 ;;
         -h|--help)    usage 0 ;;
         *) printf 'unknown option: %s\n\n' "$1" >&2; usage 1 ;;
@@ -106,7 +109,9 @@ post_install_notes() {
        start-hyprland
   3. Set your monitors in ~/.config/hypr/conf/monitors.lua
      (`hyprctl monitors all` lists the outputs).
-  4. The config reloads on save. To reload by hand: hyprctl reload
+  4. If you installed the system packages, enable the bluetooth daemon:
+       sudo systemctl enable --now bluetooth.service
+  5. The config reloads on save. To reload by hand: hyprctl reload
      To see what Hyprland disliked:  hyprctl configerrors
 
   If something in the config is broken, Hyprland still gives you
@@ -124,6 +129,10 @@ fi
 
 if (( WITH_OPTIONAL )); then
     install_packages "$DOTFILES/packages/pacman-optional.txt" "optional packages"
+fi
+
+if (( WITH_SYSTEM )); then
+    install_packages "$DOTFILES/packages/pacman-system.txt" "system packages"
 fi
 
 if (( WITH_NVIDIA )); then

@@ -51,6 +51,7 @@ Re-running it is safe: links that already point here are left alone.
 | `--dry-run`, `-n` | print every action, change nothing |
 | `--packages` | install the core packages with pacman |
 | `--optional` | install the optional extras |
+| `--system` | install bluetooth, network and tray tools |
 | `--nvidia` | install the NVIDIA packages |
 | `--help`, `-h` | usage |
 
@@ -106,6 +107,7 @@ config/{waybar,wofi,kitty,mako}/
 install.sh                    symlinks and packages
 packages/pacman.txt           hard dependencies — the config breaks without them
 packages/pacman-optional.txt  extras, each tied to a commented-out feature
+packages/pacman-system.txt    bluetooth, network, removable drives
 packages/pacman-nvidia.txt    driver and video acceleration
 tests/check.lua               offline config check
 ```
@@ -129,6 +131,23 @@ Configs reload the moment you save them. To reload by hand: `hyprctl reload`.
 To see what Hyprland objected to: `hyprctl configerrors`. And if you break the
 config badly, Hyprland still hands you emergency binds — `SUPER+Q` for a
 terminal, `SUPER+R` to run something, `SUPER+M` to get out.
+
+## Bluetooth and the tray
+
+```bash
+./install.sh --system
+sudo systemctl enable --now bluetooth.service
+```
+
+The daemon has to be enabled explicitly — installing `bluez` does not start it,
+and `blueman` shows an empty window until it runs.
+
+That pulls in three tray applets: `blueman-applet` for bluetooth, `nm-applet`
+for the network, and `udiskie` for USB drives. `conf/autostart.lua` launches
+each one only if it is actually installed, so the same config works on a
+machine with none of them. Waybar gains a bluetooth module that hides itself
+when the machine has no controller, and clicking the network module opens
+`nm-connection-editor`.
 
 ## Keeping the app list clean
 

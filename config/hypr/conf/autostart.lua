@@ -10,10 +10,15 @@ hl.on("hyprland.start", function()
 
     -- Polkit agent. Without it, GUI apps cannot ask for a password.
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
+
+    -- Tray applets from packages/pacman-system.txt. The guard runs inside sh,
+    -- so a program that isn't installed is a no-op rather than an error.
+    hl.exec_cmd("command -v blueman-applet >/dev/null 2>&1 && blueman-applet")
+    hl.exec_cmd("command -v nm-applet     >/dev/null 2>&1 && nm-applet --indicator")
+    hl.exec_cmd("command -v udiskie       >/dev/null 2>&1 && udiskie --tray")
 end)
 
 -- Things worth adding once the matching packages are installed:
 --   hl.exec_cmd("hyprpaper")                              -- wallpaper
 --   hl.exec_cmd("hypridle")                               -- idle / auto-lock
 --   hl.exec_cmd("wl-paste --watch cliphist store")        -- clipboard history
---   hl.exec_cmd("nm-applet --indicator")                  -- network tray icon

@@ -1,0 +1,24 @@
+# System services and tray applets — the hardware side of a desktop.
+# Nothing in the config depends on these, but the tray applets are picked up
+# automatically by conf/autostart.lua once they exist.
+#
+#   ./install.sh --system
+#
+# Bluetooth needs its daemon enabled afterwards, or nothing will work:
+#   sudo systemctl enable --now bluetooth.service
+
+# Bluetooth
+bluez                    # the daemon
+bluez-utils              # bluetoothctl, the CLI front end
+blueman                  # GUI manager (blueman-manager) and tray applet
+
+# Network.
+# Check `systemctl is-enabled NetworkManager` before installing: if the network
+# is already managed another way (systemd-networkd, plain iwd), adding
+# NetworkManager on top makes the two fight over the interface.
+networkmanager
+network-manager-applet   # nm-applet tray icon and nm-connection-editor
+
+# Removable drives: automounts USB storage and puts it in the tray.
+# Thunar can already mount through gvfs; this makes it happen on insert.
+udiskie
