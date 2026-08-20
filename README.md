@@ -23,7 +23,7 @@ See the [configuration docs](https://wiki.hypr.land/Configuring/Start/).
 ## Quick start
 
 ```bash
-git clone -b claude/hyprland-config-dotfiles-uefx51 https://github.com/irrdntst/hypr ~/dotfiles
+git clone https://github.com/irrdntst/hypr ~/dotfiles
 cd ~/dotfiles
 ./install.sh --packages --nvidia
 ```
