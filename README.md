@@ -25,8 +25,11 @@ See the [configuration docs](https://wiki.hypr.land/Configuring/Start/).
 ```bash
 git clone https://github.com/irrdntst/hypr ~/dotfiles
 cd ~/dotfiles
-./install.sh --packages --nvidia
+./install.sh
 ```
+
+One command, no flags: it installs every package list, enables the bluetooth
+daemon, and links the configs.
 
 Reboot, then from a tty:
 
@@ -46,15 +49,21 @@ That's it. `SUPER+Return` opens a terminal, `SUPER+R` the launcher,
 there is moved to `<name>.bak.<timestamp>` — nothing is ever deleted silently.
 Re-running it is safe: links that already point here are left alone.
 
+Run with no arguments it does everything: core packages, optional extras,
+bluetooth/network/tray tools, NVIDIA drivers when a card is present, then the
+symlinks. The flags are there to do *less*.
+
 | Flag | Effect |
 | --- | --- |
 | `--dry-run`, `-n` | print every action, change nothing |
-| `--packages` | install the core packages with pacman |
-| `--optional` | install the optional extras |
-| `--system` | install bluetooth, network and tray tools |
-| `--nvidia` | install the NVIDIA packages |
+| `--links-only` | symlinks only, install nothing |
 | `--restore` | remove our links and put the backed-up configs back |
+| `--packages` / `--optional` / `--system` / `--nvidia` | narrow the install to that one list |
 | `--help`, `-h` | usage |
+
+The NVIDIA list is skipped automatically when no NVIDIA card is found — the
+check reads `lspci`, falling back to the PCI vendor id in sysfs on systems
+without pciutils. Pass `--nvidia` to install it anyway.
 
 It honours `XDG_CONFIG_HOME`, so you can rehearse the whole thing in a
 throwaway directory before touching your real config:
@@ -153,13 +162,13 @@ terminal, `SUPER+R` to run something, `SUPER+M` to get out.
 
 ## Bluetooth and the tray
 
+`./install.sh` installs these and enables the daemon itself. Installing
+`bluez` alone does not start it, and `blueman` shows an empty window until it
+runs, so the installer does it for you:
+
 ```bash
-./install.sh --system
 sudo systemctl enable --now bluetooth.service
 ```
-
-The daemon has to be enabled explicitly — installing `bluez` does not start it,
-and `blueman` shows an empty window until it runs.
 
 That pulls in three tray applets: `blueman-applet` for bluetooth, `nm-applet`
 for the network, and `udiskie` for USB drives. `conf/autostart.lua` launches

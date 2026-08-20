@@ -1,14 +1,17 @@
 #!/usr/bin/env bash
-# Symlink these dotfiles into ~/.config, backing up whatever is already there.
+# Install everything and link the configs into ~/.config.
 #
+#   ./install.sh               everything: all packages, then the symlinks
 #   ./install.sh --dry-run     show what would happen, change nothing
-#   ./install.sh               link the configs
-#   ./install.sh --packages    also install the core packages with pacman
-#   ./install.sh --optional    also install the optional extras
-#   ./install.sh --system      also install bluetooth, network and tray tools
-#   ./install.sh --nvidia      also install the NVIDIA packages
+#   ./install.sh --links-only  symlinks only, install nothing
 #   ./install.sh --restore     undo: drop our links, put the backups back
 #
+# The flags below narrow the install to one list instead of all of them:
+#
+#   --packages  core   --optional  extras
+#   --system    bluetooth, network, tray   --nvidia  drivers
+#
+# NVIDIA packages are skipped automatically when no NVIDIA card is present.
 # Safe to re-run: links that already point here are left alone.
 
 set -euo pipefail
@@ -18,14 +21,18 @@ CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
 DRY_RUN=0
+RESTORE=0
+LINKS_ONLY=0
+
+# Set by the narrowing flags. When none is given, everything is installed.
+EXPLICIT=0
 WITH_PACKAGES=0
 WITH_OPTIONAL=0
 WITH_SYSTEM=0
-RESTORE=0
 WITH_NVIDIA=0
 
 usage() {
-    sed -n '2,13p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
     exit "${1:-0}"
 }
 
@@ -43,10 +50,11 @@ run() {
 while (( $# )); do
     case "$1" in
         -n|--dry-run) DRY_RUN=1 ;;
-        --packages)   WITH_PACKAGES=1 ;;
-        --optional)   WITH_OPTIONAL=1 ;;
-        --system)     WITH_SYSTEM=1 ;;
-        --nvidia)     WITH_NVIDIA=1 ;;
+        --packages)   WITH_PACKAGES=1; EXPLICIT=1 ;;
+        --optional)   WITH_OPTIONAL=1; EXPLICIT=1 ;;
+        --system)     WITH_SYSTEM=1;   EXPLICIT=1 ;;
+        --nvidia)     WITH_NVIDIA=1;   EXPLICIT=1 ;;
+        --links-only) LINKS_ONLY=1 ;;
         --restore)    RESTORE=1 ;;
         -h|--help)    usage 0 ;;
         *) printf 'unknown option: %s\n\n' "$1" >&2; usage 1 ;;
@@ -72,6 +80,30 @@ install_packages() {
 
     log "  ${#packages[@]} packages: ${packages[*]}"
     run sudo pacman -S --needed "${packages[@]}"
+}
+
+has_nvidia_gpu() {
+    # lspci is the readable check; the sysfs vendor id (0x10de is NVIDIA) works
+    # even on a system without pciutils installed.
+    if command -v lspci >/dev/null 2>&1 && lspci 2>/dev/null | grep -qi nvidia; then
+        return 0
+    fi
+    grep -qxi '0x10de' /sys/bus/pci/devices/*/vendor 2>/dev/null
+}
+
+enable_bluetooth() {
+    step "Enabling the bluetooth daemon"
+
+    if ! command -v systemctl >/dev/null 2>&1; then
+        log "  no systemctl — skipping"
+        return
+    fi
+    if ! command -v bluetoothctl >/dev/null 2>&1 && ! (( DRY_RUN )); then
+        log "  bluez is not installed — skipping"
+        return
+    fi
+
+    run sudo systemctl enable --now bluetooth.service
 }
 
 link_configs() {
@@ -146,9 +178,7 @@ post_install_notes() {
        start-hyprland
   3. Set your monitors in ~/.config/hypr/conf/monitors.lua
      (`hyprctl monitors all` lists the outputs).
-  4. If you installed the system packages, enable the bluetooth daemon:
-       sudo systemctl enable --now bluetooth.service
-  5. The config reloads on save. To reload by hand: hyprctl reload
+  4. The config reloads on save. To reload by hand: hyprctl reload
      To see what Hyprland disliked:  hyprctl configerrors
 
   If something in the config is broken, Hyprland still gives you
@@ -158,6 +188,24 @@ NOTES
 
 if (( DRY_RUN )); then
     log "DRY RUN — nothing will be changed."
+fi
+
+if (( RESTORE )); then
+    restore_configs
+    exit 0
+fi
+
+# No narrowing flag means the whole thing.
+if (( ! EXPLICIT && ! LINKS_ONLY )); then
+    WITH_PACKAGES=1
+    WITH_OPTIONAL=1
+    WITH_SYSTEM=1
+    if has_nvidia_gpu; then
+        WITH_NVIDIA=1
+    else
+        log "No NVIDIA card detected — skipping the driver list."
+        log "Force it with: ./install.sh --nvidia"
+    fi
 fi
 
 if (( WITH_PACKAGES )); then
@@ -170,15 +218,11 @@ fi
 
 if (( WITH_SYSTEM )); then
     install_packages "$DOTFILES/packages/pacman-system.txt" "system packages"
+    enable_bluetooth
 fi
 
 if (( WITH_NVIDIA )); then
     install_packages "$DOTFILES/packages/pacman-nvidia.txt" "NVIDIA packages"
-fi
-
-if (( RESTORE )); then
-    restore_configs
-    exit 0
 fi
 
 link_configs
