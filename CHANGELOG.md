@@ -14,6 +14,43 @@ See [Road to 1.0](README.md#road-to-10) for what the first stable release means.
 
 ## [Unreleased]
 
+## [0.2.0] — 2026-08-20
+
+Everything on the road to 1.0 except a verified clean install.
+
+### Added
+
+- **One palette** in `theme/palette.env`, with `tools/theme.sh` rendering
+  `look.lua`, `hyprlock.conf`, waybar, wofi, kitty and mako from templates.
+  Change `ACCENT` once instead of editing four files and missing one.
+- **Screen lock**: hyprlock styled from the palette on `SUPER+L`, hypridle
+  locking after 10 minutes idle and blanking the display after 15. Fullscreen
+  windows inhibit both.
+- **Screenshots** on `Print`, `SHIFT+Print` and `ALT+Print` — screen, region
+  and focused window — each landing on the clipboard, in
+  `~/Pictures/Screenshots`, and in a notification.
+- **Clipboard history** through cliphist, browsed with wofi on
+  `SUPER+SHIFT+V`.
+- **Dark GTK apps**: `gtk-3.0`/`gtk-4.0` settings plus the gsettings keys that
+  GTK4 and the XDG portal read, applied at session start. Adwaita cursor set
+  through `XCURSOR_THEME`.
+- **`tests/check.sh`** — one command for every off-compositor check: config,
+  theme drift, JSON, shell syntax, shellcheck, executable bits.
+- **CI** running those checks on every push.
+
+### Changed
+
+- The config check now follows a program launched behind a terminal's `-e`,
+  reads waybar `exec` values, and verifies that scripts the config references
+  exist in the repo and are executable.
+- `wl-clipboard` moved from optional to core; the screenshot and clipboard
+  features depend on it.
+
+### Notes
+
+Nerd Font icons in waybar were dropped rather than deferred: an unavailable
+glyph renders as an empty box, text labels never do.
+
 ## [0.1.0] — 2026-08-20
 
 The skeleton: a working Hyprland desktop, installed by one command.
@@ -45,5 +82,6 @@ The skeleton: a working Hyprland desktop, installed by one command.
   compositor, and verifies every program the config invokes is covered by a
   package list.
 
-[Unreleased]: https://github.com/irrdntst/hypr/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/irrdntst/hypr/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/irrdntst/hypr/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/irrdntst/hypr/releases/tag/v0.1.0

@@ -1,0 +1,53 @@
+# GENERATED from theme/templates/kitty.conf.in by tools/theme.sh.
+# Edit the template or theme/palette.env, then re-run it.
+
+# kitty. https://sw.kovidgoyal.net/kitty/conf/
+
+font_family      @FONT@
+font_size        @TERM_FONT_SIZE@
+
+# No bell, no window decorations, no confirmation on close.
+enable_audio_bell no
+window_padding_width 6
+hide_window_decorations yes
+confirm_os_window_close 0
+
+# Opaque: transparency forces the compositor to blend every frame.
+background_opacity 1.0
+
+scrollback_lines 10000
+cursor_shape block
+cursor_blink_interval 0
+
+# Colours come from theme/palette.env.
+foreground #@TEXT@
+background #@BG@
+selection_foreground #@BG@
+selection_background #@ACCENT@
+cursor #@ACCENT@
+url_color #@ACCENT@
+
+# black
+color0  #@ANSI_BLACK@
+color8  #@ANSI_BRIGHT_BLACK@
+# red
+color1  #@ANSI_RED@
+color9  #@ANSI_BRIGHT_RED@
+# green
+color2  #@ANSI_GREEN@
+color10 #@ANSI_BRIGHT_GREEN@
+# yellow
+color3  #@ANSI_YELLOW@
+color11 #@ANSI_BRIGHT_YELLOW@
+# blue
+color4  #@ANSI_BLUE@
+color12 #@ANSI_BRIGHT_BLUE@
+# magenta
+color5  #@ANSI_MAGENTA@
+color13 #@ANSI_BRIGHT_MAGENTA@
+# cyan
+color6  #@ANSI_CYAN@
+color14 #@ANSI_BRIGHT_CYAN@
+# white
+color7  #@ANSI_WHITE@
+color15 #@ANSI_BRIGHT_WHITE@

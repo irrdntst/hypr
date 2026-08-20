@@ -70,6 +70,13 @@ hl.window_rule({
     pin   = true,
 })
 
+-- Fullscreen video should not be interrupted by the lock screen.
+hl.window_rule({
+    name  = "no-idle-when-fullscreen",
+    match = { fullscreen = true },
+    idle_inhibit = "fullscreen",
+})
+
 ---- Layer rules ----
 -- Layers are the non-window surfaces: bars, launchers, notifications.
 -- Nothing needed here while blur and animations are off, but this is where

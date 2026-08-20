@@ -3,17 +3,17 @@
 
 /* Waybar. */
 
-@define-color bg      #16181d;
-@define-color surface  #1e2128;
-@define-color border   #2a2e38;
-@define-color text     #d4d6dd;
-@define-color muted    #7a8091;
-@define-color accent   #7aa2c7;
-@define-color urgent   #c06a6a;
+@define-color bg      #@BG@;
+@define-color surface  #@SURFACE@;
+@define-color border   #@BORDER@;
+@define-color text     #@TEXT@;
+@define-color muted    #@MUTED@;
+@define-color accent   #@ACCENT@;
+@define-color urgent   #@URGENT@;
 
 * {
-  font-family: "JetBrainsMono Nerd Font", "DejaVu Sans Mono", monospace;
-  font-size: 12px;
+  font-family: "@FONT@", "@FONT_FALLBACK@", monospace;
+  font-size: @FONT_SIZE@px;
   border: none;
   border-radius: 0;
   min-height: 0;
@@ -76,7 +76,7 @@ window#waybar {
 }
 
 #battery.warning {
-  color: #d1a35c;
+  color: #@WARN@;
 }
 
 #battery.critical {

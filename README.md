@@ -83,6 +83,7 @@ XDG_CONFIG_HOME=/tmp/hyprtest ./install.sh
 | `SUPER + Return` | terminal (kitty) |
 | `SUPER + R` | launcher (wofi) |
 | `SUPER + Escape` | resource monitor (btop: processes, CPU, RAM, GPU) |
+| `SUPER + L` | lock the screen |
 | `SUPER + Q` / `SUPER + SHIFT + Q` | close window / kill the process |
 | `SUPER + M` | exit Hyprland |
 | `SUPER + V` | toggle floating |
@@ -101,6 +102,8 @@ XDG_CONFIG_HOME=/tmp/hyprtest ./install.sh
 | `SUPER + S` / `SUPER + SHIFT + S` | scratchpad |
 | `SUPER + LMB` / `SUPER + RMB` | drag / resize with the mouse |
 | `SUPER + ALT + R` | resize mode (`Esc` to leave) |
+| `SUPER + SHIFT + V` | clipboard history |
+| `Print` / `SHIFT + Print` / `ALT + Print` | screenshot: screen / region / window |
 | `SUPER + N` / `SUPER + SHIFT + N` | dismiss notifications / do-not-disturb |
 | `SUPER + SHIFT + R` | reload the config |
 | volume keys | volume and mic |
@@ -114,8 +117,11 @@ Keyboard layout toggles with `Alt + Shift` (`us` ⇄ `ru`).
 
 ```
 config/hypr/hyprland.lua      entry point — nothing but require()
-config/hypr/hyprpaper.conf    wallpaper (hyprlang, not Lua)
+config/hypr/hyprpaper.conf    wallpaper      (hyprlang, not Lua)
+config/hypr/hyprlock.conf     lock screen    (generated from the palette)
+config/hypr/hypridle.conf     idle timeouts
 config/hypr/wallpapers/       the default wallpaper lives here
+config/hypr/scripts/          screenshot and GTK theme helpers
 config/hypr/conf/
     env.lua                   environment variables, NVIDIA block
     monitors.lua              displays
@@ -125,6 +131,10 @@ config/hypr/conf/
     keybinds.lua              every bind
     autostart.lua             what starts with the session
 config/{waybar,wofi,kitty,mako}/
+config/gtk-3.0, gtk-4.0/      dark theme for GTK apps
+theme/palette.env             the one place colours are defined
+theme/templates/              sources for every generated config
+tools/theme.sh                renders the templates
 install.sh                    symlinks and packages
 packages/pacman.txt           hard dependencies — the config breaks without them
 packages/pacman-optional.txt  extras, each tied to a commented-out feature
@@ -140,8 +150,15 @@ the rest of the config down with it. Machine-specific tweaks go in
 ## Checking the config without Hyprland
 
 ```bash
-lua tests/check.lua
+tests/check.sh
 ```
+
+One command for everything verifiable off a compositor: the config itself, the
+theme, JSON syntax, shell syntax, shellcheck and the executable bits. Missing
+tools are reported as skipped, so it runs anywhere. The same script runs in CI
+on every push.
+
+The config check underneath it is `tests/check.lua`:
 
 This builds a stub `hl` global mirroring the documented API, then executes the
 config against it. Syntax errors, misspelled `hl.*` functions, unknown
@@ -193,6 +210,42 @@ network and, on this machine, the NVIDIA GPU — btop from the Arch repos is
 built with GPU support and reads the card through `nvidia-ml`. Waybar's cpu,
 ram and gpu readouts open the same window when clicked. For deeper GPU detail
 there is `nvtop` in the optional list.
+
+## Colours
+
+Every colour lives in [`theme/palette.env`](theme/palette.env) — eight semantic
+names plus the sixteen terminal ones. The configs that carry colour are
+generated from templates in `theme/templates/`:
+
+```bash
+vim theme/palette.env
+tools/theme.sh            # rewrite the generated configs
+tools/theme.sh --diff     # or see what would change first
+```
+
+That covers `conf/look.lua`, `hyprlock.conf`, waybar, wofi, kitty and mako —
+change `ACCENT` once and the focused window border, the bar's clock, the
+selection colour and the lock screen all follow. `tests/check.sh` fails if a
+generated file drifts from the palette, so an edit made in the wrong place
+gets caught rather than silently overwritten later.
+
+Files carry a `GENERATED` header naming the template that produced them.
+
+## Locking, screenshots and the clipboard
+
+`SUPER + L` locks the screen through `loginctl lock-session`, which hypridle
+turns into a hyprlock window. Left alone, the session locks itself after ten
+minutes and blanks the display after fifteen — timeouts live in
+`hypridle.conf`. Fullscreen windows inhibit all of it, so a film is not
+interrupted. There is no automatic suspend; the commented listener at the
+bottom of that file adds one.
+
+`Print` grabs the screen, `SHIFT+Print` a region you drag, `ALT+Print` the
+focused window. Each one lands on the clipboard *and* in
+`~/Pictures/Screenshots`, and raises a notification with the file name.
+
+`SUPER + SHIFT + V` opens the clipboard history in wofi — cliphist records
+everything you copy, and picking an entry puts it back on the clipboard.
 
 ## Keeping the app list clean
 
@@ -260,10 +313,14 @@ git log --oneline v0.1.0.. # what landed since
 `1.0` is the point where this stops being a skeleton: a fresh Arch machine
 gets a desktop that needs nothing added by hand.
 
-- [ ] `hyprlock` + `hypridle` — screen lock and idle handling
-- [ ] `grim` + `slurp` — screenshots (binds waiting in `keybinds.lua`)
-- [ ] `cliphist` — clipboard history
-- [ ] dark GTK/Qt theming, so Thunar and friends stop rendering light
-- [ ] one shared palette file instead of four hand-synced copies
-- [ ] Nerd Font icons in waybar instead of text labels
+- [x] `hyprlock` + `hypridle` — screen lock and idle handling
+- [x] `grim` + `slurp` — screenshots
+- [x] `cliphist` — clipboard history
+- [x] dark GTK theming, so Thunar and friends stop rendering light
+- [x] one shared palette file instead of four hand-synced copies
+- [x] checks running in CI on every push
 - [ ] a full install verified end to end on a clean machine
+
+Nerd Font icons in waybar were considered and dropped: a glyph that the
+installed font happens to lack renders as an empty box, and text labels never
+do. The bar stays legible over pretty.

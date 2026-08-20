@@ -25,6 +25,9 @@ hl.bind(mod .. " + R",      hl.dsp.exec_cmd(menu))
 -- The class is what the floating window rule in conf/rules.lua matches on.
 hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("kitty --class monitor -e btop"))
 
+-- Lock the screen. hypridle does the same after 10 minutes.
+hl.bind(mod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
+
 ---- Session ----
 hl.bind(mod .. " + Q",         hl.dsp.window.close())
 hl.bind(mod .. " + SHIFT + Q", hl.dsp.window.kill())
@@ -132,6 +135,11 @@ hl.bind(mod .. " + N",         hl.dsp.exec_cmd("makoctl dismiss -a"))
 hl.bind(mod .. " + SHIFT + N", hl.dsp.exec_cmd("makoctl mode -t do-not-disturb"))
 
 ---- Screenshots ----
--- Needs grim + slurp + wl-clipboard. Uncomment once they're installed.
--- hl.bind("Print",         hl.dsp.exec_cmd("grim - | wl-copy"))
--- hl.bind("SHIFT + Print", hl.dsp.exec_cmd('grim -g "$(slurp)" - | wl-copy'))
+-- Each one lands on the clipboard and in ~/Pictures/Screenshots.
+hl.bind("Print",         hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh full"))
+hl.bind("SHIFT + Print", hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh region"))
+hl.bind("ALT + Print",   hl.dsp.exec_cmd("~/.config/hypr/scripts/screenshot.sh window"))
+
+---- Clipboard history ----
+hl.bind(mod .. " + SHIFT + V", hl.dsp.exec_cmd(
+    "cliphist list | wofi --dmenu | cliphist decode | wl-copy"))

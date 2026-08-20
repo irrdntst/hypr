@@ -4,6 +4,7 @@
 ---- Cursor ----
 hl.env("XCURSOR_SIZE", "24")
 hl.env("HYPRCURSOR_SIZE", "24")
+hl.env("XCURSOR_THEME", "Adwaita")
 
 ---- Toolkits ----
 -- Qt apps: prefer Wayland, fall back to XWayland, and let Hyprland draw the

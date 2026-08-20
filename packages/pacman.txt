@@ -22,7 +22,21 @@ wofi
 kitty
 mako
 hyprpaper                     # wallpaper, started from conf/autostart.lua
+hyprlock                      # screen lock, SUPER+L
+hypridle                      # locks and blanks on idle
 btop                          # resource monitor on SUPER+Escape
+
+# Screenshots (Print / SHIFT+Print / ALT+Print) and clipboard
+grim
+slurp
+wl-clipboard
+cliphist                      # clipboard history on SUPER+SHIFT+V
+libnotify                     # notify-send, used by the screenshot script
+jq                            # the screenshot script reads window geometry with it
+
+# Dark GTK apps
+adwaita-icon-theme            # icons and the Adwaita cursor
+dconf                         # gsettings needs a backend to persist anything
 
 # Audio. wpctl comes from wireplumber and drives the volume keybinds.
 pipewire

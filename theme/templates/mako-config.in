@@ -3,10 +3,10 @@
 
 # mako. https://man.archlinux.org/man/mako.5
 
-font=JetBrainsMono Nerd Font 10
-background-color=#1e2128
-text-color=#d4d6dd
-border-color=#2a2e38
+font=@FONT@ 10
+background-color=#@SURFACE@
+text-color=#@TEXT@
+border-color=#@BORDER@
 border-size=1
 border-radius=0
 
@@ -24,8 +24,8 @@ icons=1
 invisible=1
 
 [urgency=low]
-text-color=#7a8091
+text-color=#@MUTED@
 
 [urgency=critical]
-border-color=#c06a6a
+border-color=#@URGENT@
 default-timeout=0

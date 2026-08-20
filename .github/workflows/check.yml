@@ -1,0 +1,21 @@
+name: check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install the tools the checks need
+        run: sudo apt-get update && sudo apt-get install -y lua5.4 shellcheck
+
+      # Runs the Hyprland config against a stub API, verifies every program it
+      # invokes is in a package list, checks the generated theme files are in
+      # sync with theme/palette.env, and lints the shell.
+      - name: Run checks
+        run: ./tests/check.sh

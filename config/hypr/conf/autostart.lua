@@ -11,6 +11,16 @@ hl.on("hyprland.start", function()
     -- Wallpaper. Configured in hyprpaper.conf next to this file.
     hl.exec_cmd("hyprpaper")
 
+    -- Idle handling: lock after 10 minutes, screen off after 15.
+    -- Timeouts live in hypridle.conf.
+    hl.exec_cmd("hypridle")
+
+    -- Clipboard history, read back with SUPER+SHIFT+V.
+    hl.exec_cmd("wl-paste --watch cliphist store")
+
+    -- Dark GTK apps.
+    hl.exec_cmd("~/.config/hypr/scripts/gtk-theme.sh")
+
     -- Polkit agent. Without it, GUI apps cannot ask for a password.
     hl.exec_cmd("systemctl --user start hyprpolkitagent")
 
@@ -22,5 +32,3 @@ hl.on("hyprland.start", function()
 end)
 
 -- Things worth adding once the matching packages are installed:
---   hl.exec_cmd("hypridle")                               -- idle / auto-lock
---   hl.exec_cmd("wl-paste --watch cliphist store")        -- clipboard history

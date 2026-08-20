@@ -6,8 +6,8 @@
 -- https://wiki.hypr.land/Configuring/Basics/Variables/
 --
 -- Palette (kept in sync by hand with waybar/style.css, kitty and mako):
---   bg #16181d   surface #1e2128   border #2a2e38
---   text #d4d6dd   muted #7a8091   accent #7aa2c7   urgent #c06a6a
+--   bg #@BG@   surface #@SURFACE@   border #@BORDER@
+--   text #@TEXT@   muted #@MUTED@   accent #@ACCENT@   urgent #@URGENT@
 
 hl.config({
     general = {
@@ -16,8 +16,8 @@ hl.config({
         border_size = 1,
 
         col = {
-            active_border   = "rgb(7aa2c7)",
-            inactive_border = "rgb(2a2e38)",
+            active_border   = "rgb(@ACCENT@)",
+            inactive_border = "rgb(@BORDER@)",
         },
 
         -- Drag borders and gaps to resize. Costs nothing, saves a keybind.
@@ -47,7 +47,7 @@ hl.config({
         force_default_wallpaper = 0,       -- no anime mascot
         disable_hyprland_logo   = true,
         disable_splash_rendering = true,
-        background_color        = 0x16181d,
+        background_color        = 0x@BG@,
     },
 
     -- Uncomment ONLY if the cursor flickers or disappears on NVIDIA.

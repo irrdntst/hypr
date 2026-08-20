@@ -4,22 +4,22 @@
 /* wofi. */
 
 window {
-  background-color: #16181d;
-  border: 1px solid #2a2e38;
-  font-family: "JetBrainsMono Nerd Font", "DejaVu Sans Mono", monospace;
+  background-color: #@BG@;
+  border: 1px solid #@BORDER@;
+  font-family: "@FONT@", "@FONT_FALLBACK@", monospace;
   font-size: 13px;
 }
 
 #input {
   margin: 6px;
   padding: 6px 8px;
-  background-color: #1e2128;
-  border: 1px solid #2a2e38;
-  color: #d4d6dd;
+  background-color: #@SURFACE@;
+  border: 1px solid #@BORDER@;
+  color: #@TEXT@;
 }
 
 #input:focus {
-  border: 1px solid #7aa2c7;
+  border: 1px solid #@ACCENT@;
   outline: none;
 }
 
@@ -32,14 +32,14 @@ window {
 
 #entry {
   padding: 5px 8px;
-  color: #d4d6dd;
+  color: #@TEXT@;
 }
 
 #entry:selected {
-  background-color: #7aa2c7;
-  color: #16181d;
+  background-color: #@ACCENT@;
+  color: #@BG@;
 }
 
 #text:selected {
-  color: #16181d;
+  color: #@BG@;
 }

@@ -192,7 +192,15 @@ local PACKAGE_OF = {
     grim          = "grim",
     slurp         = "slurp",
     cliphist      = "cliphist",
+    hyprlock     = "hyprlock",
+    hypridle     = "hypridle",
+    grim         = "grim",
+    slurp        = "slurp",
+    cliphist     = "cliphist",
+    jq           = "jq",
+    ["notify-send"]          = "libnotify",
     ["wl-copy"]              = "wl-clipboard",
+    ["wl-paste"]             = "wl-clipboard",
     ["blueman-applet"]       = "blueman",
     ["blueman-manager"]      = "blueman",
     ["nm-applet"]            = "network-manager-applet",
@@ -203,7 +211,37 @@ local PACKAGE_OF = {
 local ALWAYS_PRESENT = {
     ["command"] = true, ["sh"] = true, ["systemctl"] = true, ["pkill"] = true,
     ["echo"] = true, ["true"] = true, ["false"] = true, ["test"] = true,
+    -- systemd and glib are part of any Arch install with a desktop on it
+    ["loginctl"] = true, ["gsettings"] = true,
 }
+
+-- A command starting with ~/ or / is one of our own scripts rather than a
+-- package. Those have to exist in the repo, and be executable.
+local seen_scripts = {}
+local function check_script(path)
+    local relative = path:match("^~/%.config/(.+)$")
+    if not relative then return false end
+    if seen_scripts[relative] then return true end
+    seen_scripts[relative] = true
+
+    local file = ROOT .. "/config/" .. relative
+    local f = io.open(file, "r")
+    if not f then
+        fail(("config runs '%s', but %s does not exist in the repo")
+            :format(path, "config/" .. relative))
+        return true
+    end
+    f:close()
+
+    -- io cannot stat, so ask the shell whether the bit is set.
+    local p = io.popen('test -x "' .. file .. '" && echo yes')
+    local executable = p and p:read("l") == "yes"
+    if p then p:close() end
+    if not executable then
+        fail(("%s is not executable — chmod +x it"):format("config/" .. relative))
+    end
+    return true
+end
 
 -- Waybar runs commands too, and they live in JSON rather than Lua. Some
 -- modules take an action name there instead of a program; those are not
@@ -249,6 +287,9 @@ if have_lists then
         -- Drop redirections, then treat |, & and ; as command boundaries.
         local stripped = cmd:gsub("%d*[<>]+%s*%S+", " ")
         for segment in stripped:gsub("[|&;]+", "\n"):gmatch("[^\n]+") do
+            local script = segment:match("^%s*([~/][%w%._%-/]*)")
+            if script and check_script(script) then goto continue end
+
             local found = { segment:match("^%s*([%w%._%-/]+)") }
             -- A terminal launcher hides a second program behind -e.
             local nested = segment:match("%-e%s+([%w%._%-/]+)")
@@ -268,6 +309,7 @@ if have_lists then
                     end
                 end
             end
+            ::continue::
         end
     end
 end
