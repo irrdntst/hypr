@@ -1,0 +1,74 @@
+name: release
+
+# Tags are cut here, not by hand: put a version heading in CHANGELOG.md, push,
+# and this creates v<version> plus a GitHub release with that section as the
+# notes. Runs the checks first, so a broken config never gets a tag.
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Read the newest released version from CHANGELOG.md
+        id: version
+        run: |
+          set -euo pipefail
+          version="$(sed -n 's/^## \[\([0-9][0-9.]*\)\].*/\1/p' CHANGELOG.md | head -1)"
+          if [ -z "$version" ]; then
+            echo "no released version in CHANGELOG.md"
+            echo "todo=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
+
+          echo "version=$version" >> "$GITHUB_OUTPUT"
+          if git rev-parse -q --verify "refs/tags/v$version" >/dev/null; then
+            echo "v$version already tagged, nothing to do"
+            echo "todo=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "v$version is new"
+            echo "todo=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Install the tools the checks need
+        if: steps.version.outputs.todo == 'true'
+        run: sudo apt-get update && sudo apt-get install -y lua5.4 shellcheck
+
+      - name: Run checks
+        if: steps.version.outputs.todo == 'true'
+        run: ./tests/check.sh
+
+      - name: Extract the release notes
+        if: steps.version.outputs.todo == 'true'
+        run: |
+          set -euo pipefail
+          awk -v v="${{ steps.version.outputs.version }}" '
+              $0 ~ "^## \\[" v "\\]" { inside = 1; next }
+              inside && /^## \[/     { exit }
+              inside                 { print }
+          ' CHANGELOG.md > notes.md
+          # trim blank lines at both ends, keep the ones in between
+          sed -i -e '/./,$!d' notes.md
+          tac notes.md | sed -e '/./,$!d' | tac > notes.trimmed && mv notes.trimmed notes.md
+          cat notes.md
+
+      - name: Tag and publish
+        if: steps.version.outputs.todo == 'true'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          set -euo pipefail
+          gh release create "v$VERSION" \
+            --title "hypr $VERSION" \
+            --notes-file notes.md \
+            --target "$GITHUB_SHA"

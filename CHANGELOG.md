@@ -14,6 +14,11 @@ See [Road to 1.0](README.md#road-to-10) for what the first stable release means.
 
 ## [Unreleased]
 
+### Added
+
+- Releases are cut by CI. A new version heading here becomes a tag and a
+  GitHub release once the checks pass; no one tags by hand.
+
 ### Fixed
 
 - GTK apps stayed light. Two causes: naming `Adwaita-dark` as the theme leaves

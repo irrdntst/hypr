@@ -298,7 +298,10 @@ If the cursor flickers or vanishes, uncomment `no_hardware_cursors` in
 ## Versioning
 
 Versions are git tags, `v0.1.0` and up, with the reasoning behind each release
-in [CHANGELOG.md](CHANGELOG.md). Semantic versioning, read for a config: major
+in [CHANGELOG.md](CHANGELOG.md). Nobody tags by hand: add a version heading to
+the changelog, push to `main`, and CI runs the checks, creates `v<version>`
+and publishes a release with that section as the notes. A version that is
+already tagged is left alone, so ordinary pushes do nothing. Semantic versioning, read for a config: major
 means you have to relearn or reinstall something, minor means a new capability,
 patch means a fix you can ignore. Below `1.0` a minor release may still break
 things.
