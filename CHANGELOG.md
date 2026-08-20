@@ -14,6 +14,17 @@ See [Road to 1.0](README.md#road-to-10) for what the first stable release means.
 
 ## [Unreleased]
 
+### Fixed
+
+- GTK apps stayed light. Two causes: naming `Adwaita-dark` as the theme leaves
+  GTK on the light default unless `gnome-themes-extra` is installed, and the
+  session script wrote gsettings keys whose schema
+  (`gsettings-desktop-schemas`) was not in the package list, so it failed
+  before setting anything. `settings.ini` now asks for plain Adwaita plus
+  `prefer-dark`, which is dark with no extra package, both packages joined the
+  core list, and the script checks for the schema and for the theme before
+  using either.
+
 ## [0.2.0] — 2026-08-20
 
 Everything on the road to 1.0 except a verified clean install.

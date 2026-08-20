@@ -36,6 +36,8 @@ jq                            # the screenshot script reads window geometry with
 
 # Dark GTK apps
 adwaita-icon-theme            # icons and the Adwaita cursor
+gnome-themes-extra            # ships Adwaita-dark; without it GTK stays light
+gsettings-desktop-schemas     # the schema the session script writes to
 dconf                         # gsettings needs a backend to persist anything
 
 # Audio. wpctl comes from wireplumber and drives the volume keybinds.
