@@ -1,0 +1,17 @@
+# NVIDIA packages. Install with: ./install.sh --nvidia
+#
+# nvidia-open-dkms = proprietary driver with the open kernel modules. Required
+# for the 50xx series, recommended for 16xx/20xx and newer. On an older card
+# that the open modules don't support, swap it for nvidia-dkms.
+#
+# DKMS needs the headers of every kernel you run: linux-headers for the stock
+# kernel, linux-zen-headers for zen, linux-cachyos-headers on CachyOS, etc.
+
+nvidia-open-dkms
+nvidia-utils
+egl-wayland
+libva-nvidia-driver   # VA-API video decode; also uncomment NVD_BACKEND in conf/env.lua
+linux-headers
+
+# Uncomment if you run 32-bit apps (Steam, Wine) and have [multilib] enabled:
+# lib32-nvidia-utils

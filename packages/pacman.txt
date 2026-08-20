@@ -1,0 +1,37 @@
+# Core packages. Install with: ./install.sh --packages
+# Lines starting with # and blank lines are ignored.
+
+# Compositor and session plumbing
+hyprland
+xorg-xwayland
+xdg-desktop-portal-hyprland   # screen sharing, native file pickers
+xdg-desktop-portal-gtk        # GTK portal backend (file dialogs)
+polkit
+hyprpolkitagent               # lets GUI apps ask for a password
+
+# The base stack
+waybar
+wofi
+kitty
+mako
+
+# Audio
+pipewire
+pipewire-pulse
+pipewire-alsa
+wireplumber
+pavucontrol
+playerctl
+
+# Utilities used by keybinds
+brightnessctl
+wl-clipboard
+
+# Wayland support for Qt apps
+qt5-wayland
+qt6-wayland
+
+# Fonts
+ttf-jetbrains-mono-nerd
+noto-fonts
+noto-fonts-emoji
