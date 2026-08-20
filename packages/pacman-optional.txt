@@ -10,6 +10,7 @@ playerctl          # media keybinds in conf/keybinds.lua (commented out)
 brightnessctl      # backlight keybinds in conf/keybinds.lua (commented out); laptops only
 pavucontrol        # GUI volume mixer; re-add "on-click" to waybar's pulseaudio module
 wl-clipboard       # needed by the screenshot binds and by cliphist
+nvtop              # GPU-only monitor, more detail than btop's GPU panel
 qt5-wayland        # only if you run Qt5 apps
 pipewire-alsa      # only if you run apps that talk to ALSA directly
 noto-fonts         # broad Unicode coverage outside the Nerd Font

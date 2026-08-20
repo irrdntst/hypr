@@ -21,6 +21,8 @@ waybar
 wofi
 kitty
 mako
+hyprpaper                     # wallpaper, started from conf/autostart.lua
+btop                          # resource monitor on SUPER+Escape
 
 # Audio. wpctl comes from wireplumber and drives the volume keybinds.
 pipewire

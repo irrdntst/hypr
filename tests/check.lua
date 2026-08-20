@@ -181,6 +181,10 @@ local PACKAGE_OF = {
     hyprctl      = "hyprland",
     hyprshutdown = "hyprland",
     hyprlauncher = "hyprlauncher",
+    hyprpaper    = "hyprpaper",
+    btop         = "btop",
+    nvtop        = "nvtop",
+    ["nvidia-smi"] = "nvidia-utils",
     brightnessctl = "brightnessctl",
     playerctl     = "playerctl",
     pavucontrol   = "pavucontrol",
@@ -209,8 +213,12 @@ local WAYBAR_ACTIONS = { activate = true, toggle = true, close = true }
 do
     local f = io.open(ROOT .. "/config/waybar/config.jsonc", "r")
     if f then
-        for cmd in f:read("a"):gmatch('"on%-click[%w%-]*"%s*:%s*"([^"]+)"') do
+        local text = f:read("a")
+        for cmd in text:gmatch('"on%-click[%w%-]*"%s*:%s*"([^"]+)"') do
             if not WAYBAR_ACTIONS[cmd] then record_cmd(cmd) end
+        end
+        for cmd in text:gmatch('"exec"%s*:%s*"([^"]+)"') do
+            record_cmd(cmd)
         end
         f:close()
     end
@@ -241,17 +249,23 @@ if have_lists then
         -- Drop redirections, then treat |, & and ; as command boundaries.
         local stripped = cmd:gsub("%d*[<>]+%s*%S+", " ")
         for segment in stripped:gsub("[|&;]+", "\n"):gmatch("[^\n]+") do
-            local binary = segment:match("^%s*([%w%._%-/]+)")
-            if binary then binary = binary:match("([^/]+)$") end
-            if binary and not ALWAYS_PRESENT[binary] and not seen[binary] then
-                seen[binary] = true
-                local pkg = PACKAGE_OF[binary]
-                if not pkg then
-                    fail(("config runs '%s', which the package map in this test does not know")
-                        :format(binary))
-                elseif not listed[pkg] then
-                    fail(("config runs '%s', but package '%s' is in no packages/*.txt")
-                        :format(binary, pkg))
+            local found = { segment:match("^%s*([%w%._%-/]+)") }
+            -- A terminal launcher hides a second program behind -e.
+            local nested = segment:match("%-e%s+([%w%._%-/]+)")
+            if nested then found[#found + 1] = nested end
+
+            for _, binary in ipairs(found) do
+                binary = binary:match("([^/]+)$")
+                if binary and not ALWAYS_PRESENT[binary] and not seen[binary] then
+                    seen[binary] = true
+                    local pkg = PACKAGE_OF[binary]
+                    if not pkg then
+                        fail(("config runs '%s', which the package map in this test does not know")
+                            :format(binary))
+                    elseif not listed[pkg] then
+                        fail(("config runs '%s', but package '%s' is in no packages/*.txt")
+                            :format(binary, pkg))
+                    end
                 end
             end
         end

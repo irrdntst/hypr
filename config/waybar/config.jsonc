@@ -16,6 +16,7 @@
     "network",
     "cpu",
     "memory",
+    "custom/gpu",
     "battery",
     "tray",
     "clock"
@@ -74,14 +75,28 @@
     "interval": 10
   },
 
+  // Clicking any of the three opens the resource monitor, same as SUPER+Escape.
   "cpu": {
     "format": "cpu {usage}%",
-    "interval": 5
+    "interval": 5,
+    "on-click": "kitty --class monitor -e btop"
   },
 
   "memory": {
     "format": "ram {percentage}%",
-    "interval": 5
+    "interval": 5,
+    "tooltip-format": "{used:0.1f}G of {total:0.1f}G",
+    "on-click": "kitty --class monitor -e btop"
+  },
+
+  // NVIDIA only. nvidia-smi comes with nvidia-utils; on a machine without it
+  // the module stays empty instead of erroring.
+  "custom/gpu": {
+    "exec": "nvidia-smi --query-gpu=utilization.gpu --format=csv,noheader,nounits",
+    "format": "gpu {}%",
+    "interval": 5,
+    "tooltip": false,
+    "on-click": "kitty --class monitor -e btop"
   },
 
   "battery": {

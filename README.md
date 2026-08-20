@@ -73,6 +73,7 @@ XDG_CONFIG_HOME=/tmp/hyprtest ./install.sh
 | --- | --- |
 | `SUPER + Return` | terminal (kitty) |
 | `SUPER + R` | launcher (wofi) |
+| `SUPER + Escape` | resource monitor (btop: processes, CPU, RAM, GPU) |
 | `SUPER + Q` / `SUPER + SHIFT + Q` | close window / kill the process |
 | `SUPER + M` | exit Hyprland |
 | `SUPER + V` | toggle floating |
@@ -104,6 +105,8 @@ Keyboard layout toggles with `Alt + Shift` (`us` ⇄ `ru`).
 
 ```
 config/hypr/hyprland.lua      entry point — nothing but require()
+config/hypr/hyprpaper.conf    wallpaper (hyprlang, not Lua)
+config/hypr/wallpapers/       the default wallpaper lives here
 config/hypr/conf/
     env.lua                   environment variables, NVIDIA block
     monitors.lua              displays
@@ -165,6 +168,23 @@ machine with none of them. Waybar gains a bluetooth module that hides itself
 when the machine has no controller, and clicking the network module opens
 `nm-connection-editor`.
 
+## Wallpaper and monitoring
+
+The wallpaper is a plain gradient generated to match the palette, sitting at
+`config/hypr/wallpapers/default.png`. Drop your own image in that directory and
+point `hyprpaper.conf` at it, or point `path` at the directory itself to
+rotate through every image in it on a timer — the commented block in that file
+shows both.
+
+`hyprpaper.conf` is still hyprlang, not Lua: only `hyprland.conf` moved to Lua
+in 0.55, the rest of the ecosystem kept its old format.
+
+`SUPER + Escape` opens btop in a floating window: processes, CPU, RAM, disks,
+network and, on this machine, the NVIDIA GPU — btop from the Arch repos is
+built with GPU support and reads the card through `nvidia-ml`. Waybar's cpu,
+ram and gpu readouts open the same window when clicked. For deeper GPU detail
+there is `nvtop` in the optional list.
+
 ## Keeping the app list clean
 
 `packages/pacman.txt` holds only what the config actually calls. Everything
@@ -219,7 +239,6 @@ The skeleton is deliberately bare. Placeholders are already commented in place
 for the next layer:
 
 - [ ] `hyprlock` + `hypridle` — screen lock and idle handling
-- [ ] `hyprpaper` — wallpapers
 - [ ] `grim` + `slurp` — screenshots (binds waiting in `keybinds.lua`)
 - [ ] `cliphist` — clipboard history
 - [ ] one shared palette file instead of four hand-synced copies

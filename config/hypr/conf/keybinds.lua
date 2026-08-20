@@ -21,6 +21,10 @@ hl.bind(mod .. " + R",      hl.dsp.exec_cmd(menu))
 -- hyprlauncher is hyprwm's own launcher (package: hyprlauncher). To try it,
 -- swap it into the bind above and keep whichever you prefer.
 
+-- Resource monitor: processes, CPU, RAM, disks, network and GPU.
+-- The class is what the floating window rule in conf/rules.lua matches on.
+hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("kitty --class monitor -e btop"))
+
 ---- Session ----
 hl.bind(mod .. " + Q",         hl.dsp.window.close())
 hl.bind(mod .. " + SHIFT + Q", hl.dsp.window.kill())

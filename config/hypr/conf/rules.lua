@@ -25,6 +25,16 @@ hl.window_rule({
     no_focus = true,
 })
 
+-- The resource monitor (SUPER+Escape) opens as a big floating window rather
+-- than rearranging whatever you were looking at.
+hl.window_rule({
+    name  = "float-monitor",
+    match = { class = "^monitor$" },
+    float  = true,
+    center = true,
+    size   = { "monitor_w * 0.7", "monitor_h * 0.7" },
+})
+
 -- Modal dialogs ("are you sure?", print, preferences) belong on top of their
 -- parent, not tiled into the layout.
 hl.window_rule({
