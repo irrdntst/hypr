@@ -1,0 +1,42 @@
+/* wofi. Palette matches hypr/conf/look.lua. */
+
+window {
+  background-color: #16181d;
+  border: 1px solid #2a2e38;
+  font-family: "JetBrainsMono Nerd Font", "DejaVu Sans Mono", monospace;
+  font-size: 13px;
+}
+
+#input {
+  margin: 6px;
+  padding: 6px 8px;
+  background-color: #1e2128;
+  border: 1px solid #2a2e38;
+  color: #d4d6dd;
+}
+
+#input:focus {
+  border: 1px solid #7aa2c7;
+  outline: none;
+}
+
+#inner-box,
+#outer-box,
+#scroll {
+  background-color: transparent;
+  border: none;
+}
+
+#entry {
+  padding: 5px 8px;
+  color: #d4d6dd;
+}
+
+#entry:selected {
+  background-color: #7aa2c7;
+  color: #16181d;
+}
+
+#text:selected {
+  color: #16181d;
+}

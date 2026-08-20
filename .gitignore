@@ -1,0 +1,2 @@
+*.bak.*
+config/hypr/local.lua

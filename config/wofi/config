@@ -1,0 +1,14 @@
+# wofi. https://man.archlinux.org/man/wofi.5
+mode=drun
+allow_images=false
+allow_markup=true
+insensitive=true
+prompt=run
+width=520
+height=380
+lines=10
+location=center
+hide_scroll=true
+no_actions=true
+term=kitty
+key_expand=Tab

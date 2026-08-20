@@ -1,0 +1,87 @@
+/* Waybar. Palette matches hypr/conf/look.lua. */
+
+@define-color bg      #16181d;
+@define-color surface  #1e2128;
+@define-color border   #2a2e38;
+@define-color text     #d4d6dd;
+@define-color muted    #7a8091;
+@define-color accent   #7aa2c7;
+@define-color urgent   #c06a6a;
+
+* {
+  font-family: "JetBrainsMono Nerd Font", "DejaVu Sans Mono", monospace;
+  font-size: 12px;
+  border: none;
+  border-radius: 0;
+  min-height: 0;
+}
+
+window#waybar {
+  background: @bg;
+  color: @text;
+  border-bottom: 1px solid @border;
+}
+
+#workspaces button {
+  padding: 0 8px;
+  color: @muted;
+  background: transparent;
+}
+
+#workspaces button.active {
+  color: @bg;
+  background: @accent;
+}
+
+#workspaces button.urgent {
+  color: @bg;
+  background: @urgent;
+}
+
+#workspaces button:hover {
+  background: @surface;
+  color: @text;
+  /* Waybar draws a box-shadow on hover by default; kill it. */
+  box-shadow: none;
+  text-shadow: none;
+}
+
+#submap {
+  color: @bg;
+  background: @accent;
+  padding: 0 8px;
+}
+
+#window {
+  color: @muted;
+}
+
+#language,
+#pulseaudio,
+#network,
+#cpu,
+#memory,
+#battery,
+#clock {
+  padding: 0 6px;
+}
+
+#clock {
+  color: @accent;
+}
+
+#battery.warning {
+  color: #d1a35c;
+}
+
+#battery.critical {
+  color: @urgent;
+}
+
+#network.disconnected {
+  color: @urgent;
+}
+
+#tray {
+  padding: 0 6px;
+}

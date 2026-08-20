@@ -1,0 +1,24 @@
+# mako. https://man.archlinux.org/man/mako.5
+
+font=JetBrainsMono Nerd Font 10
+background-color=#1e2128
+text-color=#d4d6dd
+border-color=#2a2e38
+border-size=1
+border-radius=0
+
+anchor=top-right
+margin=6
+padding=10
+width=340
+height=110
+default-timeout=6000
+max-visible=5
+icons=1
+
+[urgency=low]
+text-color=#7a8091
+
+[urgency=critical]
+border-color=#c06a6a
+default-timeout=0
