@@ -1,0 +1,47 @@
+# GENERATED from theme/templates/mimeapps.list.in by tools/render.sh.
+# Edit the template or apps/defaults.env, then re-run it.
+#
+# One program per job, so nothing opens in a second browser or a second
+# image viewer. https://specifications.freedesktop.org/mime-apps-spec/
+
+[Default Applications]
+text/html=firefox.desktop
+application/xhtml+xml=firefox.desktop
+x-scheme-handler/http=firefox.desktop
+x-scheme-handler/https=firefox.desktop
+x-scheme-handler/about=firefox.desktop
+x-scheme-handler/unknown=firefox.desktop
+
+inode/directory=thunar.desktop
+
+image/png=imv.desktop
+image/jpeg=imv.desktop
+image/gif=imv.desktop
+image/webp=imv.desktop
+image/bmp=imv.desktop
+image/tiff=imv.desktop
+image/svg+xml=imv.desktop
+
+video/mp4=mpv.desktop
+video/x-matroska=mpv.desktop
+video/webm=mpv.desktop
+video/quicktime=mpv.desktop
+video/x-msvideo=mpv.desktop
+audio/mpeg=mpv.desktop
+audio/flac=mpv.desktop
+audio/x-wav=mpv.desktop
+audio/ogg=mpv.desktop
+
+application/pdf=org.pwmt.zathura.desktop
+
+text/plain=hypr-text-editor.desktop
+text/markdown=hypr-text-editor.desktop
+application/json=hypr-text-editor.desktop
+application/x-shellscript=hypr-text-editor.desktop
+
+application/zip=xarchiver.desktop
+application/x-tar=xarchiver.desktop
+application/x-compressed-tar=xarchiver.desktop
+application/x-7z-compressed=xarchiver.desktop
+application/vnd.rar=xarchiver.desktop
+application/x-zstd-compressed-tar=xarchiver.desktop

@@ -58,7 +58,7 @@ symlinks. The flags are there to do *less*.
 | `--dry-run`, `-n` | print every action, change nothing |
 | `--links-only` | symlinks only, install nothing |
 | `--restore` | remove our links and put the backed-up configs back |
-| `--packages` / `--optional` / `--system` / `--nvidia` | narrow the install to that one list |
+| `--packages` / `--optional` / `--system` / `--apps` / `--nvidia` | narrow the install to that one list |
 | `--help`, `-h` | usage |
 
 The NVIDIA list is skipped automatically when no NVIDIA card is found — the
@@ -132,9 +132,14 @@ config/hypr/conf/
     autostart.lua             what starts with the session
 config/{waybar,wofi,kitty,mako}/
 config/gtk-3.0, gtk-4.0/      dark theme for GTK apps
+config/mimeapps.list          which program opens what (generated)
+share/applications/           desktop entries this repo ships
+apps/defaults.env             the standard program for each job
+apps/hidden.list              entries to keep out of the launcher
 theme/palette.env             the one place colours are defined
 theme/templates/              sources for every generated config
-tools/theme.sh                renders the templates
+tools/render.sh               renders the templates
+tools/apps.sh                 audits and prunes the launcher
 install.sh                    symlinks and packages
 packages/pacman.txt           hard dependencies — the config breaks without them
 packages/pacman-optional.txt  extras, each tied to a commented-out feature
@@ -219,8 +224,8 @@ generated from templates in `theme/templates/`:
 
 ```bash
 vim theme/palette.env
-tools/theme.sh            # rewrite the generated configs
-tools/theme.sh --diff     # or see what would change first
+tools/render.sh           # rewrite the generated configs
+tools/render.sh --diff    # or see what would change first
 ```
 
 That covers `conf/look.lua`, `hyprlock.conf`, waybar, wofi, kitty and mako —
@@ -247,35 +252,51 @@ focused window. Each one lands on the clipboard *and* in
 `SUPER + SHIFT + V` opens the clipboard history in wofi — cliphist records
 everything you copy, and picking an entry puts it back on the clipboard.
 
-## Keeping the app list clean
+## Standard applications
 
-`packages/pacman.txt` holds only what the config actually calls. Everything
-else — media keys, a GUI mixer, screenshot tools — lives in
-`pacman-optional.txt`, with the matching keybinds commented out until you
-install the package.
+One program per job, declared in [`apps/defaults.env`](apps/defaults.env):
 
-The reason is the launcher. Every GUI package drops a `.desktop` file into
-`/usr/share/applications`, and wofi lists all of them whether or not they are
-useful — including entries pulled in as dependencies of something else. To see
-what is actually there:
+| Job | Program |
+| --- | --- |
+| browser | Firefox |
+| files | Thunar |
+| images | imv |
+| video and audio | mpv |
+| PDF | zathura |
+| text | nvim in kitty |
+| archives | xarchiver |
+
+`tools/render.sh` turns that into `config/mimeapps.list`, so a link opens in
+one browser and an image in one viewer — no "open with" roulette. To swap a
+default, change the desktop id there and re-render:
 
 ```bash
-ls /usr/share/applications
+vim apps/defaults.env
+tools/render.sh
+tools/apps.sh --check     # confirms each id actually exists on this machine
 ```
 
-To hide an entry without uninstalling anything, shadow it with a local
-override:
+## Keeping the launcher honest
+
+wofi lists every `.desktop` file on the system, including entries whose
+program was never installed, ones left behind by a package you removed, and
+helpers that are not applications at all.
 
 ```bash
-mkdir -p ~/.local/share/applications
-printf '[Desktop Entry]\nType=Application\nName=whatever\nExec=/bin/true\nNoDisplay=true\n' \
-  > ~/.local/share/applications/whatever.desktop
+tools/apps.sh             # what is listed, and what is stale
+tools/apps.sh --prune     # hide the stale ones
+tools/apps.sh --restore   # undo all of it
 ```
 
-Files in `~/.local/share/applications` take precedence over the system ones, so
-`NoDisplay=true` removes the entry from every launcher while leaving the
-package installed. If an entry *does* something odd instead of hiding, run its
-`Exec=` line by hand in a terminal — that is where the real error message is.
+An entry counts as stale when the program in its `TryExec`, or the first word
+of its `Exec`, is not on `PATH`. Hiding writes a same-named file into
+`~/.local/share/applications` with `NoDisplay=true`, which shadows the system
+entry — nothing is deleted, and every override is marked so `--restore` knows
+which files are ours. Entries that are installed but still do not belong in a
+menu are listed in [`apps/hidden.list`](apps/hidden.list).
+
+`--prune` also works in reverse: reinstall a program and it unhides the entry
+again. `install.sh` runs it once at the end of an install.
 
 ## NVIDIA
 
@@ -322,6 +343,7 @@ gets a desktop that needs nothing added by hand.
 - [x] dark GTK theming, so Thunar and friends stop rendering light
 - [x] one shared palette file instead of four hand-synced copies
 - [x] checks running in CI on every push
+- [x] one standard program per job, and a launcher that lists only what exists
 - [ ] a full install verified end to end on a clean machine
 
 Nerd Font icons in waybar were considered and dropped: a glyph that the

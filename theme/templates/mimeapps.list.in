@@ -1,0 +1,47 @@
+# GENERATED from theme/templates/mimeapps.list.in by tools/render.sh.
+# Edit the template or apps/defaults.env, then re-run it.
+#
+# One program per job, so nothing opens in a second browser or a second
+# image viewer. https://specifications.freedesktop.org/mime-apps-spec/
+
+[Default Applications]
+text/html=@BROWSER@
+application/xhtml+xml=@BROWSER@
+x-scheme-handler/http=@BROWSER@
+x-scheme-handler/https=@BROWSER@
+x-scheme-handler/about=@BROWSER@
+x-scheme-handler/unknown=@BROWSER@
+
+inode/directory=@FILE_MANAGER@
+
+image/png=@IMAGE_VIEWER@
+image/jpeg=@IMAGE_VIEWER@
+image/gif=@IMAGE_VIEWER@
+image/webp=@IMAGE_VIEWER@
+image/bmp=@IMAGE_VIEWER@
+image/tiff=@IMAGE_VIEWER@
+image/svg+xml=@IMAGE_VIEWER@
+
+video/mp4=@VIDEO_PLAYER@
+video/x-matroska=@VIDEO_PLAYER@
+video/webm=@VIDEO_PLAYER@
+video/quicktime=@VIDEO_PLAYER@
+video/x-msvideo=@VIDEO_PLAYER@
+audio/mpeg=@VIDEO_PLAYER@
+audio/flac=@VIDEO_PLAYER@
+audio/x-wav=@VIDEO_PLAYER@
+audio/ogg=@VIDEO_PLAYER@
+
+application/pdf=@PDF_VIEWER@
+
+text/plain=@TEXT_EDITOR@
+text/markdown=@TEXT_EDITOR@
+application/json=@TEXT_EDITOR@
+application/x-shellscript=@TEXT_EDITOR@
+
+application/zip=@ARCHIVER@
+application/x-tar=@ARCHIVER@
+application/x-compressed-tar=@ARCHIVER@
+application/x-7z-compressed=@ARCHIVER@
+application/vnd.rar=@ARCHIVER@
+application/x-zstd-compressed-tar=@ARCHIVER@

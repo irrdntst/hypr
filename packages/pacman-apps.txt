@@ -1,0 +1,33 @@
+# The standard applications — one program per job, declared in
+# apps/defaults.env and wired up in config/mimeapps.list.
+#
+#   ./install.sh --apps
+#
+# Installed by default along with everything else.
+
+# Browser
+firefox
+
+# Files
+thunar
+thunar-volman                 # automounts removable media inside Thunar
+thunar-archive-plugin         # "Extract here" in the context menu
+gvfs                          # mounting and trash
+tumbler                       # thumbnails
+ffmpegthumbnailer             # thumbnails for video
+xarchiver                     # the archive window itself
+unzip
+zip
+p7zip
+unrar
+
+# Media
+mpv                           # video and audio
+imv                           # images
+
+# Documents
+zathura                       # PDF
+zathura-pdf-mupdf             # the PDF backend; zathura alone opens nothing
+
+# Text
+neovim                        # behind share/applications/hypr-text-editor.desktop

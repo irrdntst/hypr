@@ -1,0 +1,9 @@
+# Desktop entries to keep out of the launcher even though their program is
+# installed. One id per line; blank lines and # comments are ignored.
+#
+# These are helpers and file handlers, not applications you launch.
+
+kitty-open.desktop            # kitty's URL handler
+xarchiver.desktop             # opens through the file manager, not the menu
+imv-dir.desktop               # imv's directory mode; imv.desktop is the app
+org.pwmt.zathura.desktop      # opened by clicking a PDF

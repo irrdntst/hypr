@@ -32,11 +32,11 @@ else
     skip "hyprland config" "no lua"
 fi
 
-printf '\n== Theme\n'
-if out="$(tools/theme.sh --check 2>&1)"; then
-    pass "generated files match theme/palette.env"
+printf '\n== Generated files\n'
+if out="$(tools/render.sh --check 2>&1)"; then
+    pass "generated files match their sources"
 else
-    fail "theme drift"
+    fail "render drift"
     printf '%s\n' "$out" | sed 's/^/          /'
 fi
 

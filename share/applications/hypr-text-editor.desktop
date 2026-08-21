@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Text Editor
+Comment=Open text files in nvim inside kitty
+Exec=kitty --class editor -e nvim %F
+Icon=text-editor
+Terminal=false
+MimeType=text/plain;text/markdown;application/json;application/x-shellscript;
+Categories=Utility;TextEditor;
+# Handles files, but has no business cluttering the launcher: SUPER+Return
+# and `nvim` are the way you start it deliberately.
+NoDisplay=true

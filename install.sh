@@ -10,6 +10,7 @@
 #
 #   --packages  core   --optional  extras
 #   --system    bluetooth, network, tray   --nvidia  drivers
+#   --apps      browser, files, media, documents
 #
 # NVIDIA packages are skipped automatically when no NVIDIA card is present.
 # Safe to re-run: links that already point here are left alone.
@@ -18,6 +19,7 @@ set -euo pipefail
 
 DOTFILES="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 CONFIG_HOME="${XDG_CONFIG_HOME:-$HOME/.config}"
+DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 STAMP="$(date +%Y%m%d-%H%M%S)"
 
 DRY_RUN=0
@@ -29,10 +31,11 @@ EXPLICIT=0
 WITH_PACKAGES=0
 WITH_OPTIONAL=0
 WITH_SYSTEM=0
+WITH_APPS=0
 WITH_NVIDIA=0
 
 usage() {
-    sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
     exit "${1:-0}"
 }
 
@@ -57,6 +60,7 @@ while (( $# )); do
         --packages)   WITH_PACKAGES=1; EXPLICIT=1 ;;
         --optional)   WITH_OPTIONAL=1; EXPLICIT=1 ;;
         --system)     WITH_SYSTEM=1;   EXPLICIT=1 ;;
+        --apps)       WITH_APPS=1;     EXPLICIT=1 ;;
         --nvidia)     WITH_NVIDIA=1;   EXPLICIT=1 ;;
         --links-only) LINKS_ONLY=1 ;;
         --restore)    RESTORE=1 ;;
@@ -110,50 +114,68 @@ enable_bluetooth() {
     run sudo systemctl enable --now bluetooth.service
 }
 
+# One symlink: back up whatever is in the way, then point at the repo.
+link_entry() {
+    local source="$1" target="$2" name="$3"
+
+    if [[ -L "$target" ]]; then
+        if [[ "$(readlink -f "$target")" == "$source" ]]; then
+            log "  $name -> already linked, skipping"
+            return
+        fi
+        log "  $name -> replacing link to $(readlink "$target")"
+        run rm "$target"
+    elif [[ -e "$target" ]]; then
+        log "  $name -> backing up to $(basename "$target").bak.$STAMP"
+        run mv "$target" "$target.bak.$STAMP"
+    else
+        log "  $name -> new"
+    fi
+
+    run ln -s "$source" "$target"
+}
+
 link_configs() {
     step "Linking configs into $CONFIG_HOME"
 
     run mkdir -p "$CONFIG_HOME"
 
-    local source target name
+    local source name
+    # Directories: config/hypr, config/waybar, ...
     for source in "$DOTFILES"/config/*/; do
         source="${source%/}"
         name="$(basename "$source")"
-        target="$CONFIG_HOME/$name"
-
-        if [[ -L "$target" ]]; then
-            if [[ "$(readlink -f "$target")" == "$source" ]]; then
-                log "  $name -> already linked, skipping"
-                continue
-            fi
-            log "  $name -> replacing link to $(readlink "$target")"
-            run rm "$target"
-        elif [[ -e "$target" ]]; then
-            log "  $name -> backing up to $name.bak.$STAMP"
-            run mv "$target" "$target.bak.$STAMP"
-        else
-            log "  $name -> new"
-        fi
-
-        run ln -s "$source" "$target"
+        link_entry "$source" "$CONFIG_HOME/$name" "$name"
     done
+
+    # Loose files: config/mimeapps.list
+    for source in "$DOTFILES"/config/*; do
+        [[ -f "$source" ]] || continue
+        name="$(basename "$source")"
+        link_entry "$source" "$CONFIG_HOME/$name" "$name"
+    done
+
+    # Desktop entries belong under the data dir, not the config dir.
+    if compgen -G "$DOTFILES/share/applications/*.desktop" >/dev/null; then
+        step "Linking desktop entries into $DATA_HOME/applications"
+        run mkdir -p "$DATA_HOME/applications"
+        for source in "$DOTFILES"/share/applications/*.desktop; do
+            name="$(basename "$source")"
+            link_entry "$source" "$DATA_HOME/applications/$name" "$name"
+        done
+    fi
 }
 
-restore_configs() {
-    step "Restoring $CONFIG_HOME from backups"
-
-    local source target name backups newest
-    for source in "$DOTFILES"/config/*/; do
-        source="${source%/}"
-        name="$(basename "$source")"
-        target="$CONFIG_HOME/$name"
+restore_entry() {
+    local source="$1" target="$2" name="$3"
+    local backups newest
 
         if [[ -L "$target" && "$(readlink -f "$target")" == "$source" ]]; then
             log "  $name -> removing our link"
             run rm "$target"
         elif [[ -e "$target" ]]; then
             log "  $name -> not ours, leaving it alone"
-            continue
+            return
         fi
 
         # Timestamped names sort chronologically, so the last glob match is the
@@ -166,7 +188,30 @@ restore_configs() {
         else
             log "  $name -> no backup to restore"
         fi
+}
+
+restore_configs() {
+    step "Restoring $CONFIG_HOME from backups"
+
+    local source name
+    for source in "$DOTFILES"/config/*/; do
+        source="${source%/}"
+        name="$(basename "$source")"
+        restore_entry "$source" "$CONFIG_HOME/$name" "$name"
     done
+
+    for source in "$DOTFILES"/config/*; do
+        [[ -f "$source" ]] || continue
+        name="$(basename "$source")"
+        restore_entry "$source" "$CONFIG_HOME/$name" "$name"
+    done
+
+    if compgen -G "$DOTFILES/share/applications/*.desktop" >/dev/null; then
+        for source in "$DOTFILES"/share/applications/*.desktop; do
+            name="$(basename "$source")"
+            restore_entry "$source" "$DATA_HOME/applications/$name" "$name"
+        done
+    fi
 
     log ""
     log "Older backups, if any, are left in place. Remove them with:"
@@ -182,7 +227,9 @@ post_install_notes() {
        start-hyprland
   3. Set your monitors in ~/.config/hypr/conf/monitors.lua
      (`hyprctl monitors all` lists the outputs).
-  4. The config reloads on save. To reload by hand: hyprctl reload
+  4. Standard applications are declared in apps/defaults.env and wired up in
+     config/mimeapps.list. Check they resolved:  tools/apps.sh --check
+  5. The config reloads on save. To reload by hand: hyprctl reload
      To see what Hyprland disliked:  hyprctl configerrors
 
   If something in the config is broken, Hyprland still gives you
@@ -206,6 +253,7 @@ if (( ! EXPLICIT && ! LINKS_ONLY )); then
     WITH_PACKAGES=1
     WITH_OPTIONAL=1
     WITH_SYSTEM=1
+    WITH_APPS=1
     if has_nvidia_gpu; then
         WITH_NVIDIA=1
     else
@@ -227,9 +275,21 @@ if (( WITH_SYSTEM )); then
     enable_bluetooth
 fi
 
+if (( WITH_APPS )); then
+    install_packages "$DOTFILES/packages/pacman-apps.txt" "standard applications"
+fi
+
 if (( WITH_NVIDIA )); then
     install_packages "$DOTFILES/packages/pacman-nvidia.txt" "NVIDIA packages"
 fi
 
 link_configs
+
+# The launcher lists every .desktop file on the system, including ones whose
+# program was never installed or has been removed since.
+if (( ! LINKS_ONLY )); then
+    step "Tidying the application menu"
+    run "$DOTFILES/tools/apps.sh" --prune
+fi
+
 post_install_notes

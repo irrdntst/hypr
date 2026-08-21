@@ -1,24 +1,28 @@
 #!/usr/bin/env bash
-# Render every colour-bearing config from theme/palette.env.
+# Render the generated configs from their declaration files.
 #
-#   tools/theme.sh           write the generated configs
-#   tools/theme.sh --check   fail if the committed files are out of date
-#   tools/theme.sh --diff    show what a render would change
+#   tools/render.sh           write the generated configs
+#   tools/render.sh --check   fail if the committed files are out of date
+#   tools/render.sh --diff    show what a render would change
+#
+# Sources:
+#   theme/palette.env   colours and fonts
+#   apps/defaults.env   which program handles which job
 #
 # Templates live in theme/templates/. A placeholder is @NAME@, matching a key
-# in palette.env. Colours are stored bare, so the template decides the syntax.
+# in either file. Colours are stored bare, so the template picks the syntax.
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-PALETTE="$ROOT/theme/palette.env"
+SOURCES=("$ROOT/theme/palette.env" "$ROOT/apps/defaults.env")
 TEMPLATES="$ROOT/theme/templates"
 
 MODE="write"
 case "${1:-}" in
     --check) MODE="check" ;;
     --diff)  MODE="diff" ;;
-    -h|--help) sed -n '2,12p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
+    -h|--help) sed -n '2,15p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'; exit 0 ;;
     "") ;;
     *) printf 'unknown option: %s\n' "$1" >&2; exit 1 ;;
 esac
@@ -32,6 +36,7 @@ waybar-style.css     config/waybar/style.css
 wofi-style.css       config/wofi/style.css
 kitty.conf           config/kitty/kitty.conf
 mako-config          config/mako/config
+mimeapps.list        config/mimeapps.list
 MAP
 }
 
@@ -51,7 +56,7 @@ build_sed_script() {
         value="${value%"${value##*[![:space:]]}"}"
         [[ -z "$key" ]] && continue
         printf 's|@%s@|%s|g\n' "$key" "$value" >> "$script"
-    done < "$PALETTE"
+    done < <(cat "${SOURCES[@]}")
     printf '%s' "$script"
 }
 
@@ -97,7 +102,7 @@ while read -r template dest; do
             ;;
         check)
             if ! cmp -s "$out" "$ROOT/$dest"; then
-                printf '%s is out of date — run tools/theme.sh\n' "$dest" >&2
+                printf '%s is out of date — run tools/render.sh\n' "$dest" >&2
                 status=1
             fi
             ;;
@@ -114,7 +119,7 @@ done < <(targets)
 if [[ "$MODE" == "write" ]]; then
     printf '%d file(s) updated\n' "$rendered"
 elif [[ "$MODE" == "check" && $status -eq 0 ]]; then
-    printf 'theme: generated files match theme/palette.env\n'
+    printf 'render: generated files match their sources\n'
 fi
 
 exit "$status"

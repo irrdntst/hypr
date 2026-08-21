@@ -14,10 +14,35 @@ See [Road to 1.0](README.md#road-to-10) for what the first stable release means.
 
 ## [Unreleased]
 
+## [0.3.0] — 2026-08-21
+
+One program per job, and a launcher that only lists what exists.
+
 ### Added
 
+- **Standard applications.** `apps/defaults.env` names the program for each
+  job — Firefox, Thunar, imv, mpv, zathura, nvim, xarchiver — and
+  `config/mimeapps.list` is generated from it, so a link always opens in the
+  same browser and an image in the same viewer. `packages/pacman-apps.txt`
+  installs them; `tools/apps.sh --check` confirms each declared entry exists.
+- **`tools/apps.sh`** — audits the application menu and hides entries whose
+  program is not installed, using standard `NoDisplay` overrides in
+  `~/.local/share/applications`. Every override is marked, `--restore` undoes
+  all of them, and re-running `--prune` unhides anything that came back.
+  `apps/hidden.list` covers entries that are installed but are not
+  applications. `install.sh` runs a prune at the end of an install.
+- A text-editor desktop entry in `share/applications/`, so text files open in
+  nvim inside kitty without cluttering the launcher.
 - Releases are cut by CI. A new version heading here becomes a tag and a
   GitHub release once the checks pass; no one tags by hand.
+
+### Changed
+
+- `tools/theme.sh` is now `tools/render.sh`: it renders from
+  `apps/defaults.env` as well as `theme/palette.env`.
+- `install.sh` links loose files and desktop entries, not just directories, so
+  `mimeapps.list` and `share/applications/` land in the right places. `--restore`
+  covers them too.
 
 ### Fixed
 
@@ -98,6 +123,7 @@ The skeleton: a working Hyprland desktop, installed by one command.
   compositor, and verifies every program the config invokes is covered by a
   package list.
 
-[Unreleased]: https://github.com/irrdntst/hypr/compare/v0.2.0...HEAD
+[Unreleased]: https://github.com/irrdntst/hypr/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/irrdntst/hypr/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/irrdntst/hypr/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/irrdntst/hypr/releases/tag/v0.1.0
