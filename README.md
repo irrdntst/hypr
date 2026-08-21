@@ -262,7 +262,7 @@ One program per job, declared in [`apps/defaults.env`](apps/defaults.env):
 | Job | Program |
 | --- | --- |
 | browser | Firefox |
-| files | Nemo |
+| files | Dolphin |
 | images | imv |
 | video and audio | mpv |
 | PDF | zathura |
@@ -423,4 +423,6 @@ added by hand. Everything on the original checklist is in:
 
 Ideas that were considered and deliberately left out: Nerd Font icons in
 waybar (a glyph the font lacks renders as an empty box; text labels never do),
-and Qt theming (nothing in the standard application set is a Qt app).
+and Qt theming — though Dolphin now makes that last one an open question: it
+is the only Qt app in the set, and outside a Plasma session it comes up in
+Breeze light until a colour scheme is written to `~/.config/kdeglobals`.
