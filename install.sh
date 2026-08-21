@@ -12,6 +12,10 @@
 #   --system    bluetooth, network, tray   --nvidia  drivers
 #   --apps      browser, files, media, documents
 #
+# System side, also on by default:
+#   --grub   let GRUB offer Windows      --clock  stop dual-boot clock drift
+#   --paru   build the AUR helper from source
+#
 # NVIDIA packages are skipped automatically when no NVIDIA card is present.
 # Safe to re-run: links that already point here are left alone.
 
@@ -33,9 +37,12 @@ WITH_OPTIONAL=0
 WITH_SYSTEM=0
 WITH_APPS=0
 WITH_NVIDIA=0
+WITH_GRUB=0
+WITH_CLOCK=0
+WITH_PARU=0
 
 usage() {
-    sed -n '2,16p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
+    sed -n '2,20p' "${BASH_SOURCE[0]}" | sed 's/^# \{0,1\}//'
     exit "${1:-0}"
 }
 
@@ -54,6 +61,17 @@ run() {
     fi
 }
 
+# Helper scripts do their own dry-run reporting, so pass the flag through
+# rather than printing the invocation and skipping the work.
+run_script() {
+    local script="$1"
+    if (( DRY_RUN )); then
+        "$script" --dry-run
+    else
+        "$script"
+    fi
+}
+
 while (( $# )); do
     case "$1" in
         -n|--dry-run) DRY_RUN=1 ;;
@@ -61,6 +79,9 @@ while (( $# )); do
         --optional)   WITH_OPTIONAL=1; EXPLICIT=1 ;;
         --system)     WITH_SYSTEM=1;   EXPLICIT=1 ;;
         --apps)       WITH_APPS=1;     EXPLICIT=1 ;;
+        --grub)       WITH_GRUB=1;     EXPLICIT=1 ;;
+        --clock)      WITH_CLOCK=1;    EXPLICIT=1 ;;
+        --paru)       WITH_PARU=1;     EXPLICIT=1 ;;
         --nvidia)     WITH_NVIDIA=1;   EXPLICIT=1 ;;
         --links-only) LINKS_ONLY=1 ;;
         --restore)    RESTORE=1 ;;
@@ -254,6 +275,9 @@ if (( ! EXPLICIT && ! LINKS_ONLY )); then
     WITH_OPTIONAL=1
     WITH_SYSTEM=1
     WITH_APPS=1
+    WITH_GRUB=1
+    WITH_CLOCK=1
+    WITH_PARU=1
     if has_nvidia_gpu; then
         WITH_NVIDIA=1
     else
@@ -283,6 +307,19 @@ if (( WITH_NVIDIA )); then
     install_packages "$DOTFILES/packages/pacman-nvidia.txt" "NVIDIA packages"
 fi
 
+# --- system side ------------------------------------------------------------
+# Each of these is a no-op on a machine that does not need it: no GRUB, no
+# Windows, no pacman.
+if (( WITH_GRUB )); then
+    step "Teaching GRUB about Windows"
+    run_script "$DOTFILES/tools/grub-windows.sh"
+fi
+
+if (( WITH_CLOCK )); then
+    step "Setting the clock up for dual boot"
+    run_script "$DOTFILES/tools/clock.sh"
+fi
+
 link_configs
 
 # The launcher lists every .desktop file on the system, including ones whose
@@ -290,6 +327,12 @@ link_configs
 if (( ! LINKS_ONLY )); then
     step "Tidying the application menu"
     run "$DOTFILES/tools/apps.sh" --prune
+fi
+
+# Last, because it compiles Rust and wants you to read a PKGBUILD.
+if (( WITH_PARU )); then
+    step "Installing the AUR helper"
+    run_script "$DOTFILES/tools/paru.sh"
 fi
 
 post_install_notes

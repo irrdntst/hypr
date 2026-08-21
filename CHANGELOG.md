@@ -14,6 +14,36 @@ See [Road to 1.0](README.md#road-to-10) for what the first stable release means.
 
 ## [Unreleased]
 
+## [0.4.0] — 2026-08-21
+
+The system side: dual boot, the clock, and an AUR helper that keeps working.
+
+### Added
+
+- **`tools/grub-windows.sh`** — flips `GRUB_DISABLE_OS_PROBER`, which GRUB
+  2.06 turned off by default, and regenerates `grub.cfg` so Windows appears in
+  the menu. Backs up `/etc/default/grub`, reports whether an entry was really
+  created, and names the three things that usually prevent it: Fast Startup,
+  an unmounted EFI partition, BitLocker. `os-prober` and `ntfs-3g` joined the
+  system package list, and README carries a hand-written menu entry for when
+  detection fails anyway.
+- **`tools/clock.sh`** — stops the time jumping by a few hours every other
+  boot. Turns on network sync first so the correct time is what reaches the
+  hardware clock, then sets the RTC to local time (the default, needs nothing
+  from Windows) or to UTC with `--utc`, printing the registry command that
+  teaches Windows to agree.
+- **`tools/paru.sh`** — builds paru from source instead of installing
+  `paru-bin`, whose prebuilt binary breaks with
+  `libalpm.so.NN: cannot open shared object file` as soon as pacman moves
+  ahead of it. Removes a leftover `paru-bin-debug` first, since it outlives
+  `pacman -Rns paru-bin` and then collides over `/usr/lib/debug`; clones into
+  a clean directory so `makepkg` cannot reinstall a stale build; enables
+  `BottomUp`, `NewsOnUpgrade` and `CleanAfter` afterwards.
+
+All three run as part of a plain `./install.sh`, and each is a no-op where it
+does not apply — no GRUB, no Windows, no pacman. `--grub`, `--clock` and
+`--paru` narrow a run to one of them.
+
 ## [0.3.0] — 2026-08-21
 
 One program per job, and a launcher that only lists what exists.
@@ -123,7 +153,8 @@ The skeleton: a working Hyprland desktop, installed by one command.
   compositor, and verifies every program the config invokes is covered by a
   package list.
 
-[Unreleased]: https://github.com/irrdntst/hypr/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/irrdntst/hypr/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/irrdntst/hypr/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/irrdntst/hypr/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/irrdntst/hypr/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/irrdntst/hypr/releases/tag/v0.1.0

@@ -59,6 +59,7 @@ symlinks. The flags are there to do *less*.
 | `--links-only` | symlinks only, install nothing |
 | `--restore` | remove our links and put the backed-up configs back |
 | `--packages` / `--optional` / `--system` / `--apps` / `--nvidia` | narrow the install to that one list |
+| `--grub` / `--clock` / `--paru` | run just that one system step |
 | `--help`, `-h` | usage |
 
 The NVIDIA list is skipped automatically when no NVIDIA card is found — the
@@ -140,6 +141,9 @@ theme/palette.env             the one place colours are defined
 theme/templates/              sources for every generated config
 tools/render.sh               renders the templates
 tools/apps.sh                 audits and prunes the launcher
+tools/grub-windows.sh         makes GRUB offer Windows
+tools/clock.sh                stops the dual-boot clock drift
+tools/paru.sh                 builds the AUR helper from source
 install.sh                    symlinks and packages
 packages/pacman.txt           hard dependencies — the config breaks without them
 packages/pacman-optional.txt  extras, each tied to a commented-out feature
@@ -297,6 +301,76 @@ menu are listed in [`apps/hidden.list`](apps/hidden.list).
 
 `--prune` also works in reverse: reinstall a program and it unhides the entry
 again. `install.sh` runs it once at the end of an install.
+
+## Dual boot
+
+`install.sh` runs both of these; each is a no-op on a machine that does not
+need it.
+
+```bash
+tools/grub-windows.sh --check    # what GRUB currently knows
+tools/grub-windows.sh            # enable os-prober and regenerate grub.cfg
+```
+
+Since GRUB 2.06 `GRUB_DISABLE_OS_PROBER` defaults to `true`, so a perfectly
+working dual-boot setup shows no Windows entry until that one line is flipped.
+The script backs up `/etc/default/grub`, sets it to `false`, regenerates
+`grub.cfg` and tells you whether a Windows entry actually appeared. When it
+does not, the usual culprits are Windows Fast Startup (`powercfg /h off`), an
+EFI partition that is not mounted, or BitLocker.
+
+If detection stays stubborn, write the entry yourself. Take the UUID of the
+partition holding `bootmgfw.efi` from `blkid`, and add to
+`/etc/grub.d/40_custom`:
+
+```
+menuentry "Windows Boot Manager" --class windows {
+    insmod part_gpt
+    insmod fat
+    insmod chain
+    search --no-floppy --fs-uuid --set=root YOUR-UUID
+    chainloader /EFI/Microsoft/Boot/bootmgfw.efi
+}
+```
+
+### The clock
+
+```bash
+tools/clock.sh           # Linux yields: hardware clock in local time
+tools/clock.sh --utc     # Windows yields: prints the registry command to run
+tools/clock.sh --check   # which way it is set now
+```
+
+Windows expects the hardware clock to hold local time, Linux expects UTC, and
+whichever boots second "fixes" it — so the time is wrong every other boot. One
+side has to give way. The default is the Linux side, because it needs nothing
+from Windows. `--utc` is the tidier answer if you are willing to set one
+registry key, and it survives daylight saving properly.
+
+The script turns on network time sync first, so the correct time is what gets
+written to hardware. It also falls back from `timedatectl` to `hwclock` when
+the D-Bus call times out, which it does in some sessions.
+
+## The AUR helper
+
+```bash
+tools/paru.sh
+```
+
+Built from source rather than installed as `paru-bin`: the prebuilt package is
+linked against one specific `libalpm`, and once pacman moves ahead of it the
+binary stops starting with `libalpm.so.NN: cannot open shared object file`. A
+local build always matches the pacman you have.
+
+The script removes a previously installed `paru-bin` first — including
+`paru-bin-debug`, which survives `pacman -Rns paru-bin` and then collides with
+the source package over `/usr/lib/debug`. It clones into a fresh directory,
+because `makepkg` will otherwise reinstall a stale package it built earlier
+instead of building the current source. Afterwards it enables `BottomUp`,
+`NewsOnUpgrade` and `CleanAfter` in `/etc/paru.conf`.
+
+`makepkg` shows you the PKGBUILD before building. Read it — the AUR is not
+moderated.
 
 ## NVIDIA
 

@@ -19,6 +19,10 @@ blueman                  # GUI manager (blueman-manager) and tray applet
 networkmanager
 network-manager-applet   # nm-applet tray icon and nm-connection-editor
 
+# Dual boot: lets GRUB find Windows. tools/grub-windows.sh does the rest.
+os-prober
+ntfs-3g
+
 # Removable drives: automounts USB storage and puts it in the tray.
 # Thunar can already mount through gvfs; this makes it happen on insert.
 udiskie
