@@ -14,6 +14,28 @@ See [Road to 1.0](README.md#road-to-10) for what the first stable release means.
 
 ## [Unreleased]
 
+### Changed
+
+- **Dolphin replaces Thunar as the file manager.** `FILE_MANAGER` in
+  `apps/defaults.env` is now `org.kde.dolphin.desktop`, so `inode/directory`
+  in the generated `config/mimeapps.list` follows. `dolphin` joined
+  `packages/pacman-apps.txt`, and the Thunar-only thumbnailer stack
+  (`tumbler`, `ffmpegthumbnailer`) was swapped for the KDE one Dolphin
+  actually uses: `kdegraphics-thumbnailers` and `ffmpegthumbs`. `gvfs` stays
+  for the GTK apps' trash and network locations.
+- Dolphin is the first Qt app in the standard set, and this config still does
+  no Qt theming: outside a Plasma session it opens in Breeze light while
+  everything else is dark. Writing a colour scheme to `~/.config/kdeglobals`
+  is the fix, and it is not done yet.
+
+### Removed
+
+- `thunar`, `thunar-volman` and `thunar-archive-plugin`. The archive plugin
+  put "Extract here" in the file manager's context menu; Dolphin takes that
+  from `ark`, which is not installed because `xarchiver` remains the declared
+  archiver. Archives still open in xarchiver on double-click, through
+  `mimeapps.list`.
+
 ## [1.0.0] — 2026-08-21
 
 The config has a name: **Ampere**. A fresh Arch machine reaches a working

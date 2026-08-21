@@ -3,7 +3,7 @@
 #
 # Two mechanisms, because GTK3 and GTK4 disagree about where the truth lives:
 #   - gtk-3.0/settings.ini and gtk-4.0/settings.ini are read directly by the
-#     toolkit and are what actually darkens Thunar.
+#     toolkit and are what actually darken the GTK apps.
 #   - the gsettings keys below are what GTK4/libadwaita and the XDG settings
 #     portal look at.
 #

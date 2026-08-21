@@ -9,12 +9,10 @@
 firefox
 
 # Files
-thunar
-thunar-volman                 # automounts removable media inside Thunar
-thunar-archive-plugin         # "Extract here" in the context menu
-gvfs                          # mounting and trash
-tumbler                       # thumbnails
-ffmpegthumbnailer             # thumbnails for video
+dolphin
+kdegraphics-thumbnailers      # thumbnails for images and PDFs
+ffmpegthumbs                  # thumbnails for video
+gvfs                          # trash and network locations for the GTK apps
 xarchiver                     # the archive window itself
 unzip
 zip
