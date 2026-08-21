@@ -16,25 +16,24 @@ See [Road to 1.0](README.md#road-to-10) for what the first stable release means.
 
 ### Changed
 
-- **Dolphin replaces Thunar as the file manager.** `FILE_MANAGER` in
-  `apps/defaults.env` is now `org.kde.dolphin.desktop`, so `inode/directory`
-  in the generated `config/mimeapps.list` follows. `dolphin` joined
-  `packages/pacman-apps.txt`, and the Thunar-only thumbnailer stack
-  (`tumbler`, `ffmpegthumbnailer`) was swapped for the KDE one Dolphin
-  actually uses: `kdegraphics-thumbnailers` and `ffmpegthumbs`. `gvfs` stays
-  for the GTK apps' trash and network locations.
-- Dolphin is the first Qt app in the standard set, and this config still does
-  no Qt theming: outside a Plasma session it opens in Breeze light while
-  everything else is dark. Writing a colour scheme to `~/.config/kdeglobals`
-  is the fix, and it is not done yet.
+- **Nemo replaces Thunar as the file manager.** `FILE_MANAGER` in
+  `apps/defaults.env` is now `nemo.desktop`, so `inode/directory` in the
+  generated `config/mimeapps.list` follows. Nemo is GTK3 like Thunar was, so
+  `config/gtk-3.0/settings.ini` still darkens it and no new theming is needed.
+  `gvfs` and `ffmpegthumbnailer` stay: Nemo reads both through the standard
+  GIO and freedesktop thumbnailer interfaces, not through anything XFCE.
 
 ### Removed
 
-- `thunar`, `thunar-volman` and `thunar-archive-plugin`. The archive plugin
-  put "Extract here" in the file manager's context menu; Dolphin takes that
-  from `ark`, which is not installed because `xarchiver` remains the declared
-  archiver. Archives still open in xarchiver on double-click, through
-  `mimeapps.list`.
+- `thunar`, `thunar-volman`, `thunar-archive-plugin` and `tumbler`. Thumbnails
+  come from `ffmpegthumbnailer` plus Nemo's own gdk-pixbuf handling; `tumbler`
+  was the XFCE thumbnail service and nothing left in the set asks for it.
+  Automounting removable media, which `thunar-volman` did inside Thunar, is
+  already `udiskie`'s job from `packages/pacman-system.txt`.
+- The archive plugin put "Extract here" in the file manager's context menu.
+  Nemo takes that from `nemo-fileroller`, which is not installed because it
+  wants `file-roller` while `xarchiver` is the declared archiver. Archives
+  still open in xarchiver on double-click, through `mimeapps.list`.
 
 ## [1.0.0] — 2026-08-21
 

@@ -9,10 +9,9 @@
 firefox
 
 # Files
-dolphin
-kdegraphics-thumbnailers      # thumbnails for images and PDFs
-ffmpegthumbs                  # thumbnails for video
-gvfs                          # trash and network locations for the GTK apps
+nemo                          # GTK3, so config/gtk-3.0 already darkens it
+gvfs                          # mounting, trash and network locations
+ffmpegthumbnailer             # thumbnails for video
 xarchiver                     # the archive window itself
 unzip
 zip
