@@ -69,6 +69,6 @@ jobs:
         run: |
           set -euo pipefail
           gh release create "v$VERSION" \
-            --title "hypr $VERSION" \
+            --title "Ampere $VERSION" \
             --notes-file notes.md \
             --target "$GITHUB_SHA"

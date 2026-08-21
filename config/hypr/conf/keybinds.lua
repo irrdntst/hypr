@@ -18,15 +18,15 @@ local menu     = "wofi --show drun"
 ---- Apps ----
 hl.bind(mod .. " + Return", hl.dsp.exec_cmd(terminal))
 hl.bind(mod .. " + R",      hl.dsp.exec_cmd(menu))
--- hyprlauncher is hyprwm's own launcher (package: hyprlauncher). To try it,
--- swap it into the bind above and keep whichever you prefer.
 
 -- Resource monitor: processes, CPU, RAM, disks, network and GPU.
 -- The class is what the floating window rule in conf/rules.lua matches on.
 hl.bind(mod .. " + Escape", hl.dsp.exec_cmd("kitty --class monitor -e btop"))
 
 -- Lock the screen. hypridle does the same after 10 minutes.
-hl.bind(mod .. " + L", hl.dsp.exec_cmd("loginctl lock-session"))
+-- Not on L: hjkl navigation owns that key, and Hyprland matches keys
+-- case-insensitively, so SUPER+L and SUPER+l are one combination.
+hl.bind(mod .. " + BackSpace", hl.dsp.exec_cmd("loginctl lock-session"))
 
 ---- Session ----
 hl.bind(mod .. " + Q",         hl.dsp.window.close())
@@ -45,13 +45,18 @@ hl.bind(mod .. " + SHIFT + F", hl.dsp.window.fullscreen({ mode = "maximized",  a
 hl.bind(mod .. " + P",         hl.dsp.window.pseudo({ action = "toggle" }))
 hl.bind(mod .. " + C",         hl.dsp.window.center())
 hl.bind(mod .. " + SHIFT + P", hl.dsp.window.pin())   -- floating only: show on every workspace
-hl.bind(mod .. " + J",         hl.dsp.layout("togglesplit"))  -- dwindle only
+hl.bind(mod .. " + T",         hl.dsp.layout("togglesplit"))  -- dwindle only
 
 ---- Focus ----
-local directions = { h = "l", j = "d", k = "u", l = "r" }
-for key, dir in pairs(directions) do
-    hl.bind(mod .. " + " .. key,           hl.dsp.focus({ direction = dir }))
-    hl.bind(mod .. " + SHIFT + " .. key,   hl.dsp.window.move({ direction = dir }))
+local directions = {
+    { key = "h", direction = "l" },
+    { key = "j", direction = "d" },
+    { key = "k", direction = "u" },
+    { key = "l", direction = "r" },
+}
+for _, it in ipairs(directions) do
+    hl.bind(mod .. " + " .. it.key,         hl.dsp.focus({ direction = it.direction }))
+    hl.bind(mod .. " + SHIFT + " .. it.key, hl.dsp.window.move({ direction = it.direction }))
 end
 
 hl.bind(mod .. " + left",  hl.dsp.focus({ direction = "l" }))
@@ -119,15 +124,10 @@ hl.bind("XF86AudioLowerVolume", hl.dsp.exec_cmd("wpctl set-volume @DEFAULT_AUDIO
 hl.bind("XF86AudioMute",    hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SINK@ toggle"),   { locked = true })
 hl.bind("XF86AudioMicMute", hl.dsp.exec_cmd("wpctl set-mute @DEFAULT_AUDIO_SOURCE@ toggle"), { locked = true })
 
--- Backlight. Needs brightnessctl (packages/pacman-optional.txt) and a panel
--- that exposes a backlight device — desktop monitors do not.
--- hl.bind("XF86MonBrightnessUp",   hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%+"), { locked = true, repeating = true })
--- hl.bind("XF86MonBrightnessDown", hl.dsp.exec_cmd("brightnessctl -e4 -n2 set 5%-"), { locked = true, repeating = true })
-
--- Media keys. Needs playerctl (packages/pacman-optional.txt).
--- hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
--- hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"),       { locked = true })
--- hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
+---- Media ----
+hl.bind("XF86AudioPlay", hl.dsp.exec_cmd("playerctl play-pause"), { locked = true })
+hl.bind("XF86AudioNext", hl.dsp.exec_cmd("playerctl next"),       { locked = true })
+hl.bind("XF86AudioPrev", hl.dsp.exec_cmd("playerctl previous"),   { locked = true })
 
 ---- Notifications ----
 -- makoctl ships with mako, so these need nothing extra.

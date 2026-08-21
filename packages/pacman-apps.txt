@@ -24,6 +24,7 @@ unrar
 # Media
 mpv                           # video and audio
 imv                           # images
+pavucontrol                   # volume mixer, opened by clicking waybar
 
 # Documents
 zathura                       # PDF

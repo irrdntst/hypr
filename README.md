@@ -1,8 +1,8 @@
-<h1 align="center">hypr</h1>
+<h1 align="center">Ampere</h1>
 
 <p align="center">
-  A lean Hyprland setup for Arch — no blur, no shadows, no animations.<br>
-  Just a compositor that gets out of the way.
+  A lean Hyprland desktop for Arch — no blur, no shadows, no animations.<br>
+  One command installs it, one file holds the colours, and every keybind works.
 </p>
 
 <p align="center">
@@ -49,16 +49,17 @@ That's it. `SUPER+Return` opens a terminal, `SUPER+R` the launcher,
 there is moved to `<name>.bak.<timestamp>` — nothing is ever deleted silently.
 Re-running it is safe: links that already point here are left alone.
 
-Run with no arguments it does everything: core packages, optional extras,
-bluetooth/network/tray tools, NVIDIA drivers when a card is present, then the
-symlinks. The flags are there to do *less*.
+Run with no arguments it does everything: packages, the standard
+applications, bluetooth and network tooling, NVIDIA drivers when a card is
+present, a GRUB entry for Windows, the dual-boot clock fix, paru built from
+source, then the symlinks. The flags are there to do *less*.
 
 | Flag | Effect |
 | --- | --- |
 | `--dry-run`, `-n` | print every action, change nothing |
 | `--links-only` | symlinks only, install nothing |
 | `--restore` | remove our links and put the backed-up configs back |
-| `--packages` / `--optional` / `--system` / `--apps` / `--nvidia` | narrow the install to that one list |
+| `--packages` / `--system` / `--apps` / `--nvidia` | narrow the install to that one list |
 | `--grub` / `--clock` / `--paru` | run just that one system step |
 | `--help`, `-h` | usage |
 
@@ -84,14 +85,15 @@ XDG_CONFIG_HOME=/tmp/hyprtest ./install.sh
 | `SUPER + Return` | terminal (kitty) |
 | `SUPER + R` | launcher (wofi) |
 | `SUPER + Escape` | resource monitor (btop: processes, CPU, RAM, GPU) |
-| `SUPER + L` | lock the screen |
+| `SUPER + BackSpace` | lock the screen |
 | `SUPER + Q` / `SUPER + SHIFT + Q` | close window / kill the process |
 | `SUPER + M` | exit Hyprland |
 | `SUPER + V` | toggle floating |
 | `SUPER + F` / `SUPER + SHIFT + F` | fullscreen / maximize |
 | `SUPER + C` | center window |
+| `SUPER + P` | pseudotile (dwindle: keep the window's own size in the layout) |
 | `SUPER + SHIFT + P` | pin a floating window to every workspace |
-| `SUPER + J` | flip the split direction |
+| `SUPER + T` | flip the split direction |
 | `SUPER + h/j/k/l`, arrows | move focus |
 | `SUPER + SHIFT + h/j/k/l` | move the window |
 | `SUPER + Tab` | last window |
@@ -107,10 +109,7 @@ XDG_CONFIG_HOME=/tmp/hyprtest ./install.sh
 | `Print` / `SHIFT + Print` / `ALT + Print` | screenshot: screen / region / window |
 | `SUPER + N` / `SUPER + SHIFT + N` | dismiss notifications / do-not-disturb |
 | `SUPER + SHIFT + R` | reload the config |
-| volume keys | volume and mic |
-
-Media and brightness keys are bound but commented out — they need `playerctl`
-and `brightnessctl` from `packages/pacman-optional.txt`.
+| volume and media keys | volume, mic, play/pause, next, previous |
 
 Keyboard layout toggles with `Alt + Shift` (`us` ⇄ `ru`).
 
@@ -146,8 +145,8 @@ tools/clock.sh                stops the dual-boot clock drift
 tools/paru.sh                 builds the AUR helper from source
 install.sh                    symlinks and packages
 packages/pacman.txt           hard dependencies — the config breaks without them
-packages/pacman-optional.txt  extras, each tied to a commented-out feature
-packages/pacman-system.txt    bluetooth, network, removable drives
+packages/pacman-system.txt    bluetooth, network, dual boot, removable drives
+packages/pacman-apps.txt      the standard applications
 packages/pacman-nvidia.txt    driver and video acceleration
 tests/check.lua               offline config check
 ```
@@ -218,7 +217,7 @@ in 0.55, the rest of the ecosystem kept its old format.
 network and, on this machine, the NVIDIA GPU — btop from the Arch repos is
 built with GPU support and reads the card through `nvidia-ml`. Waybar's cpu,
 ram and gpu readouts open the same window when clicked. For deeper GPU detail
-there is `nvtop` in the optional list.
+run `nvidia-smi` or install `nvtop`.
 
 ## Colours
 
@@ -242,7 +241,7 @@ Files carry a `GENERATED` header naming the template that produced them.
 
 ## Locking, screenshots and the clipboard
 
-`SUPER + L` locks the screen through `loginctl lock-session`, which hypridle
+`SUPER + BackSpace` locks the screen through `loginctl lock-session`, which hypridle
 turns into a hyprlock window. Left alone, the session locks itself after ten
 minutes and blanks the display after fifteen — timeouts live in
 `hypridle.conf`. Fullscreen windows inhibit all of it, so a film is not
@@ -406,20 +405,22 @@ git describe --tags        # which version you are on
 git log --oneline v0.1.0.. # what landed since
 ```
 
-## Road to 1.0
+## What 1.0 means
 
-`1.0` is the point where this stops being a skeleton: a fresh Arch machine
-gets a desktop that needs nothing added by hand.
+A fresh Arch machine reaches a working desktop with one command and nothing
+added by hand. Everything on the original checklist is in:
 
 - [x] `hyprlock` + `hypridle` — screen lock and idle handling
 - [x] `grim` + `slurp` — screenshots
 - [x] `cliphist` — clipboard history
-- [x] dark GTK theming, so Thunar and friends stop rendering light
-- [x] one shared palette file instead of four hand-synced copies
+- [x] dark GTK theming
+- [x] one shared palette file instead of hand-synced copies
 - [x] checks running in CI on every push
 - [x] one standard program per job, and a launcher that lists only what exists
-- [ ] a full install verified end to end on a clean machine
+- [x] dual boot: a Windows entry in GRUB and a clock that stops drifting
+- [x] an AUR helper that survives a pacman upgrade
+- [x] a full install verified end to end on a clean machine
 
-Nerd Font icons in waybar were considered and dropped: a glyph that the
-installed font happens to lack renders as an empty box, and text labels never
-do. The bar stays legible over pretty.
+Ideas that were considered and deliberately left out: Nerd Font icons in
+waybar (a glyph the font lacks renders as an empty box; text labels never do),
+and Qt theming (nothing in the standard application set is a Qt app).

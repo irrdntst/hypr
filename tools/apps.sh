@@ -19,7 +19,8 @@ set -uo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 DATA_HOME="${XDG_DATA_HOME:-$HOME/.local/share}"
 OVERRIDE_DIR="$DATA_HOME/applications"
-MARKER="X-Hypr-Pruned=true"
+MARKER="X-Ampere-Pruned=true"
+LEGACY_MARKER="X-Hypr-Pruned=true"     # written before the 1.0 rename
 
 MODE="audit"
 case "${1:-}" in
@@ -69,7 +70,9 @@ entry_program() {
     printf '%s' "${program##*/}"
 }
 
-is_ours() { grep -qF "$MARKER" "$1" 2>/dev/null; }
+is_ours() {
+    grep -qF "$MARKER" "$1" 2>/dev/null || grep -qF "$LEGACY_MARKER" "$1" 2>/dev/null
+}
 
 hide_entry() {
     local id="$1" reason="$2" name="$3"

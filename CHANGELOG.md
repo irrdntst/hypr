@@ -1,6 +1,6 @@
 # Changelog
 
-Notable changes to this config, newest first. The format follows
+Notable changes to Ampere, newest first. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/), and versions follow
 [Semantic Versioning](https://semver.org/) adapted to a config:
 
@@ -13,6 +13,48 @@ While the version stays at `0.x`, minor releases are allowed to break things.
 See [Road to 1.0](README.md#road-to-10) for what the first stable release means.
 
 ## [Unreleased]
+
+## [1.0.0] — 2026-08-21
+
+The config has a name: **Ampere**. A fresh Arch machine reaches a working
+desktop with one command and nothing added by hand.
+
+### Fixed
+
+- **Two keybinds never worked.** Hyprland matches keys case-insensitively, so
+  `SUPER+L` (lock) and `SUPER+l` (focus right) were one combination, as were
+  `SUPER+J` (flip split) and `SUPER+j` (focus down). In both pairs the
+  navigation bind won and the other was dead. Lock moved to
+  `SUPER+BackSpace`, flip-split to `SUPER+T`.
+- `tests/check.lua` now normalises every bind — modifiers sorted, key
+  upper-cased, submaps scoped separately — and fails on a collision, so this
+  class of bug cannot come back silently.
+- The README keybind table was missing `SUPER+P` and still advertised the old
+  lock and split keys.
+
+### Changed
+
+- **Renamed to Ampere** across the installer banner, release titles and the
+  text-editor desktop entry. `install.sh` removes the dangling pre-1.0
+  `hypr-text-editor.desktop` link, and `tools/apps.sh` still recognises
+  overrides written under the old marker.
+- **One package list fewer.** `pacman-optional.txt` is gone: `playerctl` and
+  the Noto fonts moved to the core list because active binds and correct text
+  rendering need them, `pavucontrol` joined the applications, and
+  `brightnessctl`, `nvtop`, `qt5-wayland` and `pipewire-alsa` were dropped —
+  nothing referenced them. The `--optional` flag went with the list.
+- Media keys (play/pause, next, previous) are bound for real instead of
+  sitting commented out. Backlight keys were removed rather than left dead:
+  this is a desktop, and a monitor exposes no backlight device.
+- Waybar's volume module opens `pavucontrol` on click again.
+- Focus binds are generated from an ordered list rather than `pairs()`, so the
+  config produces the same result every load.
+
+### Removed
+
+- Commented-out binds and package references that no longer pointed anywhere:
+  the hyprlauncher note, the backlight binds, the empty "worth adding" list in
+  autostart.
 
 ## [0.4.0] — 2026-08-21
 
@@ -153,7 +195,8 @@ The skeleton: a working Hyprland desktop, installed by one command.
   compositor, and verifies every program the config invokes is covered by a
   package list.
 
-[Unreleased]: https://github.com/irrdntst/hypr/compare/v0.4.0...HEAD
+[Unreleased]: https://github.com/irrdntst/hypr/compare/v1.0.0...HEAD
+[1.0.0]: https://github.com/irrdntst/hypr/compare/v0.4.0...v1.0.0
 [0.4.0]: https://github.com/irrdntst/hypr/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/irrdntst/hypr/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/irrdntst/hypr/compare/v0.1.0...v0.2.0

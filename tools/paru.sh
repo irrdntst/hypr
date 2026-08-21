@@ -12,7 +12,7 @@
 
 set -uo pipefail
 
-BUILD_ROOT="${XDG_CACHE_HOME:-$HOME/.cache}/hypr"
+BUILD_ROOT="${XDG_CACHE_HOME:-$HOME/.cache}/ampere"
 BUILD_DIR="$BUILD_ROOT/paru"
 PARU_CONF=/etc/paru.conf
 STAMP="$(date +%Y%m%d-%H%M%S)"

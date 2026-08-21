@@ -30,5 +30,3 @@ hl.on("hyprland.start", function()
     hl.exec_cmd("command -v nm-applet     >/dev/null 2>&1 && nm-applet --indicator")
     hl.exec_cmd("command -v udiskie       >/dev/null 2>&1 && udiskie --tray")
 end)
-
--- Things worth adding once the matching packages are installed:

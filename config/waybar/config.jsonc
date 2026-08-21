@@ -61,7 +61,7 @@
     "format": "vol {volume}%",
     "format-muted": "vol --",
     "format-bluetooth": "bt {volume}%",
-    // Add "on-click": "pavucontrol" here if you install the optional GUI mixer.
+    "on-click": "pavucontrol",
     "on-scroll-up": "wpctl set-volume -l 1 @DEFAULT_AUDIO_SINK@ 5%+",
     "on-scroll-down": "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
   },

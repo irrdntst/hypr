@@ -40,13 +40,17 @@ gnome-themes-extra            # ships Adwaita-dark; without it GTK stays light
 gsettings-desktop-schemas     # the schema the session script writes to
 dconf                         # gsettings needs a backend to persist anything
 
-# Audio. wpctl comes from wireplumber and drives the volume keybinds.
+# Audio. wpctl comes from wireplumber and drives the volume keybinds,
+# playerctl the media ones.
 pipewire
 pipewire-pulse
 wireplumber
+playerctl
 
 # Wayland support for Qt6 apps
 qt6-wayland
 
 # Referenced by name in waybar, kitty, wofi and mako configs
 ttf-jetbrains-mono-nerd
+noto-fonts                    # Unicode coverage the Nerd Font does not have
+noto-fonts-emoji              # without it, emoji are empty boxes everywhere

@@ -8,7 +8,7 @@
 #
 # The flags below narrow the install to one list instead of all of them:
 #
-#   --packages  core   --optional  extras
+#   --packages  core packages
 #   --system    bluetooth, network, tray   --nvidia  drivers
 #   --apps      browser, files, media, documents
 #
@@ -33,7 +33,6 @@ LINKS_ONLY=0
 # Set by the narrowing flags. When none is given, everything is installed.
 EXPLICIT=0
 WITH_PACKAGES=0
-WITH_OPTIONAL=0
 WITH_SYSTEM=0
 WITH_APPS=0
 WITH_NVIDIA=0
@@ -76,7 +75,6 @@ while (( $# )); do
     case "$1" in
         -n|--dry-run) DRY_RUN=1 ;;
         --packages)   WITH_PACKAGES=1; EXPLICIT=1 ;;
-        --optional)   WITH_OPTIONAL=1; EXPLICIT=1 ;;
         --system)     WITH_SYSTEM=1;   EXPLICIT=1 ;;
         --apps)       WITH_APPS=1;     EXPLICIT=1 ;;
         --grub)       WITH_GRUB=1;     EXPLICIT=1 ;;
@@ -176,6 +174,14 @@ link_configs() {
         link_entry "$source" "$CONFIG_HOME/$name" "$name"
     done
 
+    # The entry was called hypr-text-editor.desktop before 1.0; a dangling
+    # link to it would sit in the menu forever.
+    local stale="$DATA_HOME/applications/hypr-text-editor.desktop"
+    if [[ -L "$stale" && ! -e "$stale" ]]; then
+        log "  removing the pre-1.0 hypr-text-editor.desktop link"
+        run rm "$stale"
+    fi
+
     # Desktop entries belong under the data dir, not the config dir.
     if compgen -G "$DOTFILES/share/applications/*.desktop" >/dev/null; then
         step "Linking desktop entries into $DATA_HOME/applications"
@@ -258,7 +264,7 @@ post_install_notes() {
 NOTES
 }
 
-log "hypr $(version)"
+log "Ampere $(version)"
 
 if (( DRY_RUN )); then
     log "DRY RUN — nothing will be changed."
@@ -272,7 +278,6 @@ fi
 # No narrowing flag means the whole thing.
 if (( ! EXPLICIT && ! LINKS_ONLY )); then
     WITH_PACKAGES=1
-    WITH_OPTIONAL=1
     WITH_SYSTEM=1
     WITH_APPS=1
     WITH_GRUB=1
@@ -288,10 +293,6 @@ fi
 
 if (( WITH_PACKAGES )); then
     install_packages "$DOTFILES/packages/pacman.txt" "core packages"
-fi
-
-if (( WITH_OPTIONAL )); then
-    install_packages "$DOTFILES/packages/pacman-optional.txt" "optional packages"
 fi
 
 if (( WITH_SYSTEM )); then

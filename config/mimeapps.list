@@ -34,10 +34,10 @@ audio/ogg=mpv.desktop
 
 application/pdf=org.pwmt.zathura.desktop
 
-text/plain=hypr-text-editor.desktop
-text/markdown=hypr-text-editor.desktop
-application/json=hypr-text-editor.desktop
-application/x-shellscript=hypr-text-editor.desktop
+text/plain=ampere-text-editor.desktop
+text/markdown=ampere-text-editor.desktop
+application/json=ampere-text-editor.desktop
+application/x-shellscript=ampere-text-editor.desktop
 
 application/zip=xarchiver.desktop
 application/x-tar=xarchiver.desktop

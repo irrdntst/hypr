@@ -84,6 +84,31 @@ local SECTIONS = {
 
 local start_handlers = {}
 
+-- Bind normalisation, so SUPER+L and SUPER+l are recognised as the same key.
+-- Hyprland matches keys case-insensitively; two binds on one combination means
+-- the later one silently wins and the earlier one is dead.
+local MODIFIERS = {
+    SUPER = true, SHIFT = true, ALT = true, CTRL = true, CONTROL = true,
+    MOD = true, META = true,
+}
+
+local bindings = {}      -- normalised bind -> where it was first seen
+local current_scope = "global"
+
+local function normalise_bind(keys)
+    local mods, key = {}, nil
+    for part in keys:gmatch("[^+]+") do
+        part = part:gsub("^%s*(.-)%s*$", "%1"):upper()
+        if MODIFIERS[part] then
+            mods[#mods + 1] = part
+        else
+            key = part
+        end
+    end
+    table.sort(mods)
+    return table.concat(mods, "+") .. (key and ("+" .. key) or "")
+end
+
 local hl_fields = {
     dsp = strict("hl.dsp", dsp_fields),
 
@@ -97,6 +122,16 @@ local hl_fields = {
 
     bind = function(keys, dispatcher, flags)
         calls.binds = calls.binds + 1
+
+        if type(keys) == "string" then
+            local id = current_scope .. " :: " .. normalise_bind(keys)
+            if bindings[id] then
+                fail(("%s and %s are the same combination — one of them is dead")
+                    :format(bindings[id], keys))
+            else
+                bindings[id] = keys
+            end
+        end
         if type(keys) ~= "string" then fail("hl.bind: keys must be a string") end
         local t = type(dispatcher)
         if t ~= "table" and t ~= "function" then
@@ -111,7 +146,11 @@ local hl_fields = {
     define_submap = function(name, body)
         calls.submaps = calls.submaps + 1
         if type(body) ~= "function" then fail("hl.define_submap: body must be a function") end
+        -- Binds inside a submap live in their own namespace.
+        local outer = current_scope
+        current_scope = "submap " .. tostring(name)
         body()
+        current_scope = outer
     end,
 
     on = function(event, fn)
@@ -183,9 +222,7 @@ local PACKAGE_OF = {
     hyprlauncher = "hyprlauncher",
     hyprpaper    = "hyprpaper",
     btop         = "btop",
-    nvtop        = "nvtop",
     ["nvidia-smi"] = "nvidia-utils",
-    brightnessctl = "brightnessctl",
     playerctl     = "playerctl",
     pavucontrol   = "pavucontrol",
     udiskie       = "udiskie",
